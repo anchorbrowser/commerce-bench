@@ -1,0 +1,29 @@
+{
+  "name": "commerce-bench",
+  "version": "0.1.0",
+  "description": "Open harness for testing shopping assistants on real ecommerce sites. Stops before payment.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22.18"
+  },
+  "bin": {
+    "commerce-bench": "bin/commerce-bench.js"
+  },
+  "scripts": {
+    "bench": "node --disable-warning=ExperimentalWarning src/cli.ts",
+    "selftest": "node --disable-warning=ExperimentalWarning src/cli.ts selftest",
+    "validate": "node --disable-warning=ExperimentalWarning src/cli.ts validate",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.12.0",
+    "playwright": "^1.56.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.9.0"
+  }
+}

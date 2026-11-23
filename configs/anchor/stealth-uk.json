@@ -1,0 +1,16 @@
+{
+  "session": {
+    "proxy": {
+      "active": true,
+      "country_code": "gb"
+    }
+  },
+  "browser": {
+    "extra_stealth": {
+      "active": true
+    },
+    "captcha_solver": {
+      "active": true
+    }
+  }
+}

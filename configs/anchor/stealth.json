@@ -1,0 +1,17 @@
+{
+  "session": {
+    "proxy": {
+      "active": true,
+      "type": "anchor_proxy",
+      "country_code": "us"
+    }
+  },
+  "browser": {
+    "extra_stealth": {
+      "active": true
+    },
+    "captcha_solver": {
+      "active": true
+    }
+  }
+}

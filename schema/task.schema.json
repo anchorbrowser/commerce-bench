@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Commerce Bench site task",
+  "type": "object",
+  "required": [
+    "id",
+    "site",
+    "region",
+    "start_url",
+    "product",
+    "stop_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "site": {
+      "type": "string"
+    },
+    "region": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "start_url": {
+      "type": "string"
+    },
+    "product": {
+      "type": "object",
+      "required": [
+        "name",
+        "quantity",
+        "match"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "variant": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "match": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "variant_match": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "stop_at": {
+      "enum": [
+        "product",
+        "cart",
+        "checkout",
+        "shipping",
+        "payment"
+      ]
+    },
+    "deadline_s": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "verified"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    },
+    "patterns": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "product": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cart": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "checkout": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "add_to_cart": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "add_to_cart_body": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "order_request": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tokenize": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "payment_frame": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

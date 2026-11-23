@@ -1,0 +1,19 @@
+{
+  "id": "homedepot.com",
+  "site": "homedepot.com",
+  "region": "us",
+  "category": "home",
+  "start_url": "https://www.homedepot.com/",
+  "product": {
+    "name": "The Home Depot 5 Gallon Homer Bucket",
+    "variant": "Orange",
+    "quantity": 1,
+    "match": [
+      "homer",
+      "bucket"
+    ],
+    "variant_match": []
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

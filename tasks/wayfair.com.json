@@ -1,0 +1,21 @@
+{
+  "id": "wayfair.com",
+  "site": "wayfair.com",
+  "region": "us",
+  "category": "home",
+  "start_url": "https://www.wayfair.com/",
+  "product": {
+    "name": "Wayfair Basics 1800 Series Sheet Set",
+    "variant": "Queen, White",
+    "quantity": 1,
+    "match": [
+      "wayfair basics",
+      "sheet"
+    ],
+    "variant_match": [
+      "queen"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "ikea.com",
+  "site": "ikea.com",
+  "region": "us",
+  "category": "home",
+  "start_url": "https://www.ikea.com/us/en/",
+  "product": {
+    "name": "FRAKTA carrier bag",
+    "variant": "Large, blue",
+    "quantity": 1,
+    "match": [
+      "frakta"
+    ],
+    "variant_match": [
+      "large"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

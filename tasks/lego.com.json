@@ -1,0 +1,21 @@
+{
+  "id": "lego.com",
+  "site": "lego.com",
+  "region": "us",
+  "category": "toys",
+  "start_url": "https://www.lego.com/en-us",
+  "product": {
+    "name": "LEGO Classic Medium Creative Brick Box",
+    "variant": "Set 10696",
+    "quantity": 1,
+    "match": [
+      "medium",
+      "creative",
+      "brick",
+      "box"
+    ],
+    "variant_match": []
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

@@ -1,0 +1,6 @@
+{
+  "name": "manual",
+  "track": "observed",
+  "adapter": "manual",
+  "notes": "You drive the harness browser by hand. Use with --headed."
+}

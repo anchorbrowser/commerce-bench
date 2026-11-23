@@ -1,0 +1,21 @@
+{
+  "id": "amazon.com",
+  "site": "amazon.com",
+  "region": "us",
+  "category": "marketplace",
+  "start_url": "https://www.amazon.com/",
+  "product": {
+    "name": "Amazon Basics AA Alkaline Batteries",
+    "variant": "20 count",
+    "quantity": 1,
+    "match": [
+      "amazon basics",
+      "aa"
+    ],
+    "variant_match": [
+      "20"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

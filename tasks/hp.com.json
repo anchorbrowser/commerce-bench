@@ -1,0 +1,20 @@
+{
+  "id": "hp.com",
+  "site": "hp.com",
+  "region": "us",
+  "category": "electronics",
+  "start_url": "https://www.hp.com/us-en/shop/",
+  "product": {
+    "name": "HP 63 Black Original Ink Cartridge",
+    "variant": "Single cartridge",
+    "quantity": 1,
+    "match": [
+      "hp",
+      "63",
+      "black"
+    ],
+    "variant_match": []
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

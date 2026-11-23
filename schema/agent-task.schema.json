@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Task sent to the agent",
+  "type": "object",
+  "required": [
+    "run_id",
+    "site",
+    "start_url",
+    "goal",
+    "product",
+    "stop_at",
+    "rules",
+    "shopper",
+    "deadline_s",
+    "evidence_dir"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "site": {
+      "type": "string"
+    },
+    "start_url": {
+      "type": "string"
+    },
+    "goal": {
+      "type": "string"
+    },
+    "product": {
+      "type": "object",
+      "required": [
+        "name",
+        "quantity"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "variant": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "integer"
+        }
+      }
+    },
+    "stop_at": {
+      "enum": [
+        "product",
+        "cart",
+        "checkout",
+        "shipping",
+        "payment"
+      ]
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "shopper": {
+      "type": "object",
+      "required": [
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+        "address"
+      ],
+      "properties": {
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "address": {
+          "type": "object",
+          "required": [
+            "line1",
+            "city",
+            "postal_code",
+            "country"
+          ],
+          "properties": {
+            "line1": {
+              "type": "string"
+            },
+            "line2": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            },
+            "state": {
+              "type": "string"
+            },
+            "postal_code": {
+              "type": "string"
+            },
+            "country": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "browser": {
+      "type": "object",
+      "required": [
+        "cdp_url"
+      ],
+      "properties": {
+        "cdp_url": {
+          "type": "string"
+        }
+      },
+      "description": "Present on the observed track only."
+    },
+    "deadline_s": {
+      "type": "integer"
+    },
+    "evidence_dir": {
+      "type": "string"
+    }
+  }
+}

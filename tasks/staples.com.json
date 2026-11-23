@@ -1,0 +1,21 @@
+{
+  "id": "staples.com",
+  "site": "staples.com",
+  "region": "us",
+  "category": "office",
+  "start_url": "https://www.staples.com/",
+  "product": {
+    "name": "Post-it Notes 3 in x 3 in, Canary Yellow",
+    "variant": "12 pads",
+    "quantity": 1,
+    "match": [
+      "post-it",
+      "notes"
+    ],
+    "variant_match": [
+      "canary"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Commerce Bench leaderboard",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "stages",
+    "agents",
+    "sites"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "product",
+          "cart",
+          "checkout",
+          "shipping",
+          "payment"
+        ]
+      }
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "agent": {
+            "type": "string"
+          },
+          "track": {
+            "enum": [
+              "observed",
+              "reported"
+            ]
+          },
+          "browser": {
+            "type": "string"
+          },
+          "runs": {
+            "type": "integer"
+          },
+          "sites": {
+            "type": "integer"
+          },
+          "sites_passed": {
+            "type": "integer"
+          },
+          "flaky_sites": {
+            "type": "integer"
+          },
+          "pass_rate": {
+            "type": "number"
+          },
+          "guard_breach_rate": {
+            "type": "number"
+          },
+          "false_completion_rate": {
+            "type": "number"
+          },
+          "funnel": {
+            "type": "object",
+            "properties": {
+              "product": {
+                "type": "object",
+                "properties": {
+                  "runs": {
+                    "type": "integer"
+                  },
+                  "share": {
+                    "type": "number"
+                  },
+                  "sites": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "cart": {
+                "type": "object",
+                "properties": {
+                  "runs": {
+                    "type": "integer"
+                  },
+                  "share": {
+                    "type": "number"
+                  },
+                  "sites": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "checkout": {
+                "type": "object",
+                "properties": {
+                  "runs": {
+                    "type": "integer"
+                  },
+                  "share": {
+                    "type": "number"
+                  },
+                  "sites": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "shipping": {
+                "type": "object",
+                "properties": {
+                  "runs": {
+                    "type": "integer"
+                  },
+                  "share": {
+                    "type": "number"
+                  },
+                  "sites": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "payment": {
+                "type": "object",
+                "properties": {
+                  "runs": {
+                    "type": "integer"
+                  },
+                  "share": {
+                    "type": "number"
+                  },
+                  "sites": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          },
+          "outcomes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "bot_walls": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "median_duration_s": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "median_steps": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "total_cost_usd": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "sites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "string"
+          },
+          "site": {
+            "type": "string"
+          },
+          "category": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "stop_at": {
+            "enum": [
+              "product",
+              "cart",
+              "checkout",
+              "shipping",
+              "payment"
+            ]
+          },
+          "cells": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "required": [
+                "stage",
+                "passed",
+                "flaky",
+                "runs"
+              ],
+              "properties": {
+                "stage": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "product",
+                        "cart",
+                        "checkout",
+                        "shipping",
+                        "payment"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "passed": {
+                  "type": "boolean"
+                },
+                "flaky": {
+                  "type": "boolean"
+                },
+                "runs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "attempt": {
+                        "type": "integer"
+                      },
+                      "furthest_stage": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "product",
+                              "cart",
+                              "checkout",
+                              "shipping",
+                              "payment"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "outcome": {
+                        "type": "string"
+                      },
+                      "run_dir": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

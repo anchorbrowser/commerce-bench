@@ -1,0 +1,7 @@
+{
+  "name": "my-agent",
+  "track": "observed",
+  "adapter": "command",
+  "command": "python my_agent.py",
+  "notes": "Template. The command reads one task JSON on stdin and prints one result JSON on stdout."
+}

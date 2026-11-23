@@ -1,0 +1,20 @@
+{
+  "id": "elfcosmetics.com",
+  "site": "elfcosmetics.com",
+  "region": "us",
+  "category": "beauty",
+  "start_url": "https://www.elfcosmetics.com/",
+  "product": {
+    "name": "Power Grip Primer",
+    "variant": "Standard size",
+    "quantity": 1,
+    "match": [
+      "power",
+      "grip",
+      "primer"
+    ],
+    "variant_match": []
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

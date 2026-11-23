@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 210" width="880" height="210" role="img" aria-label="Commerce Bench: how far does your shopping agent really get?">
+  <style>
+    .t{font:700 46px -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;fill:#1f2328;letter-spacing:-1px}
+    .s{font:400 19px -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;fill:#59636e}
+    .m{font:500 12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;fill:#59636e}
+    .g{fill:#1a7f37}.r{fill:#cf222e}.rm{font:600 12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;fill:#cf222e}
+  </style>
+  <text x="24" y="82" class="t">Commerce Bench</text>
+  <text x="26" y="118" class="s">How far does your shopping agent really get?</text>
+  <text x="26" y="160" class="m">open harness · real stores · stops before payment</text>
+
+  <g transform="translate(600 36)">
+    <rect x="0" y="0" width="250" height="18" rx="2" class="g"/>
+    <rect x="0" y="28" width="203" height="18" rx="2" class="g"/>
+    <rect x="0" y="56" width="147" height="18" rx="2" class="g"/>
+    <rect x="0" y="84" width="101" height="18" rx="2" class="g"/>
+    <rect x="0" y="112" width="250" height="18" rx="2" fill="none" stroke="#cf222e" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="-12" y="14" class="m" text-anchor="end">product</text>
+    <text x="-12" y="42" class="m" text-anchor="end">cart</text>
+    <text x="-12" y="70" class="m" text-anchor="end">checkout</text>
+    <text x="-12" y="98" class="m" text-anchor="end">shipping</text>
+    <text x="-12" y="126" class="rm" text-anchor="end">payment</text>
+    <text x="125" y="126" class="rm" text-anchor="middle">never entered</text>
+  </g>
+</svg>

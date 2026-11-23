@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-23",
+  "agent": "examples/llm-agent.ts (claude-opus-5-5)",
+  "sets": [
+    {
+      "setup": "local-chromium",
+      "runs": 90,
+      "stores": 30,
+      "passed_runs": 16
+    },
+    {
+      "setup": "anchor-default",
+      "runs": 90,
+      "stores": 30,
+      "passed_runs": 21
+    },
+    {
+      "setup": "anchor-mac",
+      "runs": 15,
+      "stores": 15,
+      "passed_runs": 5
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "claude-example",
+  "track": "observed",
+  "adapter": "command",
+  "command": "node --disable-warning=ExperimentalWarning examples/llm-agent.ts",
+  "cwd": "../..",
+  "notes": "Small reference agent: a Claude tool-use loop over a numbered list of page elements. Needs ANTHROPIC_API_KEY. Set COMMERCE_BENCH_MODEL to change the model."
+}

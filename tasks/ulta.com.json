@@ -1,0 +1,22 @@
+{
+  "id": "ulta.com",
+  "site": "ulta.com",
+  "region": "us",
+  "category": "beauty",
+  "start_url": "https://www.ulta.com/",
+  "product": {
+    "name": "CeraVe Moisturizing Cream",
+    "variant": "16 oz",
+    "quantity": 1,
+    "match": [
+      "cerave",
+      "moisturizing",
+      "cream"
+    ],
+    "variant_match": [
+      "16"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

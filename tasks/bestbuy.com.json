@@ -1,0 +1,18 @@
+{
+  "id": "bestbuy.com",
+  "site": "bestbuy.com",
+  "region": "us",
+  "category": "marketplace",
+  "start_url": "https://www.bestbuy.com/",
+  "product": {
+    "name": "Apple AirTag",
+    "variant": "1 pack",
+    "quantity": 1,
+    "match": [
+      "airtag"
+    ],
+    "variant_match": []
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "lookfantastic.com",
+  "site": "lookfantastic.com",
+  "region": "uk",
+  "category": "beauty",
+  "start_url": "https://www.lookfantastic.com/",
+  "product": {
+    "name": "The Ordinary Niacinamide 10% + Zinc 1% Serum",
+    "variant": "30ml",
+    "quantity": 1,
+    "match": [
+      "ordinary",
+      "niacinamide"
+    ],
+    "variant_match": [
+      "30ml"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

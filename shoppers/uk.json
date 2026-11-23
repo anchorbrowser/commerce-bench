@@ -1,0 +1,14 @@
+{
+  "first_name": "Alex",
+  "last_name": "Taylor",
+  "email": "alex.taylor@example.com",
+  "phone": "+442079460123",
+  "address": {
+    "line1": "96 Euston Road",
+    "line2": "",
+    "city": "London",
+    "state": "",
+    "postal_code": "NW1 2DB",
+    "country": "GB"
+  }
+}

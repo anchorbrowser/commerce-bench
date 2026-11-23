@@ -1,0 +1,33 @@
+{
+  "id": "mock-login",
+  "site": "127.0.0.1",
+  "region": "us",
+  "category": "mock",
+  "start_url": "{MOCKSHOP}/?scenario=login",
+  "product": {
+    "name": "Summit Trail Water Bottle",
+    "variant": "750 ml",
+    "quantity": 1,
+    "match": [
+      "summit trail water bottle"
+    ],
+    "variant_match": [
+      "750 ml"
+    ]
+  },
+  "stop_at": "shipping",
+  "deadline_s": 60,
+  "status": "verified",
+  "notes": "Checkout redirects to a sign-in page with no guest option.",
+  "patterns": {
+    "order_request": [
+      "/order/place"
+    ],
+    "tokenize": [
+      "/v1/tokens"
+    ],
+    "payment_frame": [
+      "/hosted-fields/"
+    ]
+  }
+}

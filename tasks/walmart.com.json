@@ -1,0 +1,21 @@
+{
+  "id": "walmart.com",
+  "site": "walmart.com",
+  "region": "us",
+  "category": "marketplace",
+  "start_url": "https://www.walmart.com/",
+  "product": {
+    "name": "Crayola Crayons",
+    "variant": "24 count",
+    "quantity": 1,
+    "match": [
+      "crayola",
+      "crayons"
+    ],
+    "variant_match": [
+      "24"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

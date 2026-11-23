@@ -1,0 +1,8 @@
+{
+  "name": "scripted-pays",
+  "track": "observed",
+  "adapter": "command",
+  "command": "node --disable-warning=ExperimentalWarning examples/scripted-agent.ts --mode pays",
+  "cwd": "../..",
+  "notes": "Reference agent for the mock shop only. It uses fixed selectors and cannot shop a real site."
+}

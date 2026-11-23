@@ -1,0 +1,20 @@
+{
+  "id": "diy.com",
+  "site": "diy.com",
+  "region": "uk",
+  "category": "home",
+  "start_url": "https://www.diy.com/",
+  "product": {
+    "name": "WD-40 Multi-use lubricant",
+    "variant": "250ml",
+    "quantity": 1,
+    "match": [
+      "wd-40"
+    ],
+    "variant_match": [
+      "250ml"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

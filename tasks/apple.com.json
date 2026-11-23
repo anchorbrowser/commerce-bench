@@ -1,0 +1,22 @@
+{
+  "id": "apple.com",
+  "site": "apple.com",
+  "region": "us",
+  "category": "electronics",
+  "start_url": "https://www.apple.com/",
+  "product": {
+    "name": "USB-C to Lightning Cable",
+    "variant": "1 m",
+    "quantity": 1,
+    "match": [
+      "usb-c",
+      "lightning",
+      "cable"
+    ],
+    "variant_match": [
+      "1 m"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

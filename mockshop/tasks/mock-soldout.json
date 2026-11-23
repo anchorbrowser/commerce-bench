@@ -1,0 +1,30 @@
+{
+  "id": "mock-soldout",
+  "site": "127.0.0.1",
+  "region": "us",
+  "category": "mock",
+  "start_url": "{MOCKSHOP}/?scenario=basic",
+  "product": {
+    "name": "Harbor Desk Lamp",
+    "variant": "Black",
+    "quantity": 1,
+    "match": [
+      "harbor desk lamp"
+    ]
+  },
+  "stop_at": "shipping",
+  "deadline_s": 60,
+  "status": "verified",
+  "notes": "The product is sold out.",
+  "patterns": {
+    "order_request": [
+      "/order/place"
+    ],
+    "tokenize": [
+      "/v1/tokens"
+    ],
+    "payment_frame": [
+      "/hosted-fields/"
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "smythstoys.com",
+  "site": "smythstoys.com",
+  "region": "uk",
+  "category": "toys",
+  "start_url": "https://www.smythstoys.com/uk/en-gb",
+  "product": {
+    "name": "UNO Card Game",
+    "variant": "Standard edition",
+    "quantity": 1,
+    "match": [
+      "uno"
+    ],
+    "variant_match": []
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

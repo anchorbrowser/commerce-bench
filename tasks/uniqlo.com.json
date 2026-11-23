@@ -1,0 +1,22 @@
+{
+  "id": "uniqlo.com",
+  "site": "uniqlo.com",
+  "region": "us",
+  "category": "fashion",
+  "start_url": "https://www.uniqlo.com/us/en/",
+  "product": {
+    "name": "AIRism Cotton Crew Neck T-Shirt",
+    "variant": "White, size M",
+    "quantity": 1,
+    "match": [
+      "airism",
+      "crew",
+      "neck"
+    ],
+    "variant_match": [
+      "white"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

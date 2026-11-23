@@ -1,0 +1,22 @@
+{
+  "id": "quince.com",
+  "site": "quince.com",
+  "region": "us",
+  "category": "fashion",
+  "start_url": "https://www.quince.com/",
+  "product": {
+    "name": "Mongolian Cashmere Crewneck Sweater",
+    "variant": "Black, size M",
+    "quantity": 1,
+    "match": [
+      "mongolian",
+      "cashmere",
+      "crewneck"
+    ],
+    "variant_match": [
+      "black"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "autozone.com",
+  "site": "autozone.com",
+  "region": "us",
+  "category": "home",
+  "start_url": "https://www.autozone.com/",
+  "product": {
+    "name": "Little Trees Air Freshener",
+    "variant": "Black Ice",
+    "quantity": 1,
+    "match": [
+      "little trees"
+    ],
+    "variant_match": [
+      "black ice"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

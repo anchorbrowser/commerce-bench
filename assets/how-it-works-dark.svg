@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 370" width="880" height="370" role="img" aria-label="Your agent drives a browser over CDP on a real store. A second, read-only CDP client called the probe watches pages and network requests and records each stage. The verdict compares the probe's evidence with the agent's own claim. Payment requests to card processors are blocked.">
+  <style>
+    .b{fill:none;stroke:#f0f6fc;stroke-width:1.5}
+    .d{fill:none;stroke:#9198a1;stroke-width:1.5;stroke-dasharray:5 4}
+    .a{fill:none;stroke:#f0f6fc;stroke-width:1.5}
+    .h{font:600 16px -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;fill:#f0f6fc}
+    .p{font:400 12.5px -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;fill:#9198a1}
+    .m{font:500 11.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;fill:#9198a1}
+    .x{stroke:#f85149;stroke-width:1.5;fill:none}.xm{font:600 11.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;fill:#f85149}
+    .gm{font:600 11.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;fill:#3fb950}.gs{stroke:#3fb950;stroke-width:1.5;fill:none}
+  </style>
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="#f0f6fc" stroke-width="1.5"/></marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="#3fb950" stroke-width="1.5"/></marker>
+  </defs>
+
+  <rect x="30" y="52" width="180" height="84" rx="6" class="b"/>
+  <text x="120" y="88" class="h" text-anchor="middle">Your agent</text>
+  <text x="120" y="110" class="p" text-anchor="middle">any language or framework</text>
+
+  <rect x="330" y="32" width="220" height="124" rx="6" class="b"/>
+  <path d="M330 58H550" class="b"/>
+  <circle cx="346" cy="45" r="3.5" class="b"/><circle cx="359" cy="45" r="3.5" class="b"/><circle cx="372" cy="45" r="3.5" class="b"/>
+  <text x="440" y="100" class="h" text-anchor="middle">Browser</text>
+  <text x="440" y="122" class="p" text-anchor="middle">local, any CDP URL, or cloud</text>
+
+  <rect x="670" y="52" width="180" height="84" rx="6" class="b"/>
+  <text x="760" y="88" class="h" text-anchor="middle">Real store</text>
+  <text x="760" y="110" class="p" text-anchor="middle">guest checkout, live site</text>
+
+  <path d="M212 94H326" class="a" marker-end="url(#ah)"/>
+  <text x="269" y="84" class="m" text-anchor="middle">drives over CDP</text>
+  <path d="M554 94H666" class="a" marker-start="url(#ah)" marker-end="url(#ah)"/>
+  <text x="610" y="84" class="m" text-anchor="middle">pages</text>
+
+  <rect x="330" y="246" width="220" height="84" rx="6" class="gs"/>
+  <text x="440" y="282" class="h" text-anchor="middle">Probe</text>
+  <text x="440" y="304" class="p" text-anchor="middle">second CDP client, only watches</text>
+  <path d="M440 158V242" class="gs" marker-end="url(#ag)"/>
+  <text x="450" y="204" class="gm">pages + network</text>
+
+  <rect x="30" y="246" width="180" height="84" rx="6" class="b"/>
+  <text x="120" y="282" class="h" text-anchor="middle">Verdict</text>
+  <text x="120" y="304" class="p" text-anchor="middle">stage, outcome, honesty</text>
+  <path d="M326 288H214" class="gs" marker-end="url(#ag)"/>
+  <text x="270" y="278" class="gm" text-anchor="middle">evidence</text>
+  <path d="M120 138V242" class="a" marker-end="url(#ah)"/>
+  <text x="130" y="186" class="m">what the agent</text>
+  <text x="130" y="201" class="m">says it did</text>
+
+  <rect x="670" y="246" width="180" height="84" rx="6" class="d"/>
+  <text x="760" y="282" class="h" text-anchor="middle">Card processor</text>
+  <text x="760" y="304" class="p" text-anchor="middle">tokenize and order requests</text>
+  <path d="M552 150L600 190" class="x"/>
+  <path d="M618 205L666 246" class="x" stroke-dasharray="5 4"/>
+  <path d="M601 189L617 206M617 189L601 206" class="x" stroke-width="2"/>
+  <text x="632" y="186" class="xm">blocked</text>
+</svg>

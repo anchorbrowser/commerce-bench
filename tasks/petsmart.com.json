@@ -1,0 +1,21 @@
+{
+  "id": "petsmart.com",
+  "site": "petsmart.com",
+  "region": "us",
+  "category": "pets",
+  "start_url": "https://www.petsmart.com/",
+  "product": {
+    "name": "KONG Classic Dog Toy",
+    "variant": "Medium",
+    "quantity": 1,
+    "match": [
+      "kong",
+      "classic"
+    ],
+    "variant_match": [
+      "medium"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

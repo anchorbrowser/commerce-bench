@@ -1,0 +1,21 @@
+{
+  "id": "microcenter.com",
+  "site": "microcenter.com",
+  "region": "us",
+  "category": "electronics",
+  "start_url": "https://www.microcenter.com/",
+  "product": {
+    "name": "SanDisk Ultra microSDXC memory card",
+    "variant": "64GB",
+    "quantity": 1,
+    "match": [
+      "sandisk",
+      "ultra"
+    ],
+    "variant_match": [
+      "64gb"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

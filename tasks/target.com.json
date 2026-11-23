@@ -1,0 +1,21 @@
+{
+  "id": "target.com",
+  "site": "target.com",
+  "region": "us",
+  "category": "marketplace",
+  "start_url": "https://www.target.com/",
+  "product": {
+    "name": "Sharpie Permanent Markers, Fine Tip, Black",
+    "variant": "2 count",
+    "quantity": 1,
+    "match": [
+      "sharpie",
+      "permanent"
+    ],
+    "variant_match": [
+      "black"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

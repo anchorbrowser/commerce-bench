@@ -1,0 +1,22 @@
+{
+  "id": "michaels.com",
+  "site": "michaels.com",
+  "region": "us",
+  "category": "toys",
+  "start_url": "https://www.michaels.com/",
+  "product": {
+    "name": "Elmer's Liquid School Glue",
+    "variant": "4 oz",
+    "quantity": 1,
+    "match": [
+      "elmer",
+      "school",
+      "glue"
+    ],
+    "variant_match": [
+      "4"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

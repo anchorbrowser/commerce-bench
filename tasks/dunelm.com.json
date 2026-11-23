@@ -1,0 +1,22 @@
+{
+  "id": "dunelm.com",
+  "site": "dunelm.com",
+  "region": "uk",
+  "category": "home",
+  "start_url": "https://www.dunelm.com/",
+  "product": {
+    "name": "Egyptian Cotton Towel",
+    "variant": "Hand towel, white",
+    "quantity": 1,
+    "match": [
+      "egyptian",
+      "cotton",
+      "towel"
+    ],
+    "variant_match": [
+      "white"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

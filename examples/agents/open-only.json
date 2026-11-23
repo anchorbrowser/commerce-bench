@@ -1,0 +1,8 @@
+{
+  "name": "open-only",
+  "track": "observed",
+  "adapter": "command",
+  "command": "node --disable-warning=ExperimentalWarning examples/open-only-agent.ts",
+  "cwd": "../..",
+  "notes": "Connectivity check. Opens each start page, waits, and stops. Shows which sites wall the browser before any shopping starts."
+}

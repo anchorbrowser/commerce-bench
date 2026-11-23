@@ -1,0 +1,21 @@
+{
+  "id": "barnesandnoble.com",
+  "site": "barnesandnoble.com",
+  "region": "us",
+  "category": "books",
+  "start_url": "https://www.barnesandnoble.com/",
+  "product": {
+    "name": "Atomic Habits by James Clear",
+    "variant": "Hardcover",
+    "quantity": 1,
+    "match": [
+      "atomic",
+      "habits"
+    ],
+    "variant_match": [
+      "hardcover"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

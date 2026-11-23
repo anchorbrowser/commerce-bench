@@ -1,0 +1,10 @@
+{
+  "name": "my-hosted-assistant",
+  "track": "reported",
+  "adapter": "http",
+  "url": "https://example.com/commerce-bench/run",
+  "headers": {
+    "authorization": "env:MY_ASSISTANT_TOKEN"
+  },
+  "notes": "Template. The endpoint receives the task JSON and returns the result JSON."
+}

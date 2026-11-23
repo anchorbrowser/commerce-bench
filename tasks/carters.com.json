@@ -1,0 +1,21 @@
+{
+  "id": "carters.com",
+  "site": "carters.com",
+  "region": "us",
+  "category": "baby",
+  "start_url": "https://www.carters.com/",
+  "product": {
+    "name": "Baby 5-Pack Short-Sleeve Bodysuits",
+    "variant": "White, size 6M",
+    "quantity": 1,
+    "match": [
+      "5-pack",
+      "bodysuits"
+    ],
+    "variant_match": [
+      "white"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

@@ -1,0 +1,462 @@
+{
+  "date": "2026-11-23",
+  "what": "Each store start page opened once per browser setup, with no agent. \"opened\" means the page loaded; anything else is the outcome label that came back.",
+  "note": "One visit per cell, so a single cell can flip on a repeat.",
+  "setups": [
+    {
+      "id": "local",
+      "name": "Local Chromium",
+      "short": "Plain",
+      "config": null
+    },
+    {
+      "id": "default",
+      "name": "Anchor, default session",
+      "short": "Default",
+      "config": "configs/anchor/default.json"
+    },
+    {
+      "id": "stealth",
+      "name": "Anchor, proxy + extra stealth + captcha solving",
+      "short": "Stealth",
+      "config": "configs/anchor/stealth.json"
+    },
+    {
+      "id": "residential",
+      "name": "Anchor, residential proxy + stealth",
+      "short": "Residential",
+      "config": "configs/anchor/residential.json"
+    },
+    {
+      "id": "mac",
+      "name": "Anchor, Mac hardware",
+      "short": "Mac",
+      "config": "configs/anchor/mac.json"
+    },
+    {
+      "id": "mac-uk",
+      "name": "Anchor, Mac hardware, UK exit",
+      "short": "Mac, UK",
+      "config": "configs/anchor/mac-uk.json",
+      "fold_into": "mac"
+    }
+  ],
+  "stores": [
+    {
+      "site": "amazon.com",
+      "category": "marketplace",
+      "results": {
+        "local": "opened",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "apple.com",
+      "category": "electronics",
+      "results": {
+        "local": "opened",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "asos.com",
+      "category": "fashion",
+      "results": {
+        "local": "bot_detected:edge_deny",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": "opened"
+      },
+      "use": "default"
+    },
+    {
+      "site": "autozone.com",
+      "category": "home",
+      "results": {
+        "local": "bot_detected:datadome",
+        "default": "bot_detected:datadome",
+        "stealth": "bot_detected:datadome",
+        "residential": "opened",
+        "mac": "bot_detected:datadome",
+        "mac-uk": null
+      },
+      "use": "residential"
+    },
+    {
+      "site": "barnesandnoble.com",
+      "category": "books",
+      "results": {
+        "local": "opened",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "bestbuy.com",
+      "category": "marketplace",
+      "results": {
+        "local": "opened",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "carters.com",
+      "category": "baby",
+      "results": {
+        "local": "bot_detected:cloudflare",
+        "default": "bot_detected:cloudflare",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "stealth"
+    },
+    {
+      "site": "diy.com",
+      "category": "home",
+      "results": {
+        "local": "opened",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": "opened"
+      },
+      "use": "default"
+    },
+    {
+      "site": "dunelm.com",
+      "category": "home",
+      "results": {
+        "local": "opened",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": "opened"
+      },
+      "use": "default"
+    },
+    {
+      "site": "ebay.com",
+      "category": "marketplace",
+      "results": {
+        "local": "website_unavailable",
+        "default": "website_unavailable",
+        "stealth": "website_unavailable",
+        "residential": "website_unavailable",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "mac"
+    },
+    {
+      "site": "elfcosmetics.com",
+      "category": "beauty",
+      "results": {
+        "local": "opened",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "homedepot.com",
+      "category": "home",
+      "results": {
+        "local": "opened",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "hp.com",
+      "category": "electronics",
+      "results": {
+        "local": "website_unavailable",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "ikea.com",
+      "category": "home",
+      "results": {
+        "local": "opened",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "lego.com",
+      "category": "toys",
+      "results": {
+        "local": "bot_detected:cloudflare",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "lookfantastic.com",
+      "category": "beauty",
+      "results": {
+        "local": "opened",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": "opened"
+      },
+      "use": "default"
+    },
+    {
+      "site": "lululemon.com",
+      "category": "fashion",
+      "results": {
+        "local": "website_unavailable",
+        "default": "opened",
+        "stealth": "bot_detected:edge_deny",
+        "residential": "bot_detected:edge_deny",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "michaels.com",
+      "category": "toys",
+      "results": {
+        "local": "bot_detected:edge_deny",
+        "default": "website_unavailable",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "stealth"
+    },
+    {
+      "site": "microcenter.com",
+      "category": "electronics",
+      "results": {
+        "local": "bot_detected:edge_deny",
+        "default": "bot_detected:cloudflare",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "stealth"
+    },
+    {
+      "site": "nike.com",
+      "category": "fashion",
+      "results": {
+        "local": "opened",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "petsmart.com",
+      "category": "pets",
+      "results": {
+        "local": "opened",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "quince.com",
+      "category": "fashion",
+      "results": {
+        "local": "opened",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "sephora.com",
+      "category": "beauty",
+      "results": {
+        "local": "bot_detected:edge_deny",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "smythstoys.com",
+      "category": "toys",
+      "results": {
+        "local": "bot_detected:imperva",
+        "default": "bot_detected:imperva",
+        "stealth": "bot_detected:imperva",
+        "residential": "bot_detected:imperva",
+        "mac": "bot_detected:imperva",
+        "mac-uk": "opened"
+      },
+      "use": "mac-uk"
+    },
+    {
+      "site": "staples.com",
+      "category": "office",
+      "results": {
+        "local": "opened",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "target.com",
+      "category": "marketplace",
+      "results": {
+        "local": "bot_detected:perimeterx",
+        "default": "bot_detected:perimeterx",
+        "stealth": "bot_detected:perimeterx",
+        "residential": "bot_detected:perimeterx",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "mac"
+    },
+    {
+      "site": "ulta.com",
+      "category": "beauty",
+      "results": {
+        "local": "opened",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "uniqlo.com",
+      "category": "fashion",
+      "results": {
+        "local": "bot_detected:edge_deny",
+        "default": "bot_detected:edge_deny",
+        "stealth": "bot_detected:edge_deny",
+        "residential": "bot_detected:edge_deny",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "mac"
+    },
+    {
+      "site": "walmart.com",
+      "category": "marketplace",
+      "results": {
+        "local": "opened",
+        "default": "opened",
+        "stealth": "opened",
+        "residential": "opened",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "default"
+    },
+    {
+      "site": "wayfair.com",
+      "category": "home",
+      "results": {
+        "local": "bot_detected:perimeterx",
+        "default": "bot_detected:perimeterx",
+        "stealth": "bot_detected:perimeterx",
+        "residential": "bot_detected:perimeterx",
+        "mac": "opened",
+        "mac-uk": null
+      },
+      "use": "mac"
+    }
+  ],
+  "totals": {
+    "local": {
+      "opened": 16,
+      "of": 30
+    },
+    "default": {
+      "opened": 21,
+      "of": 30
+    },
+    "stealth": {
+      "opened": 23,
+      "of": 30
+    },
+    "residential": {
+      "opened": 24,
+      "of": 30
+    },
+    "mac": {
+      "opened": 28,
+      "of": 30
+    },
+    "mac-uk": {
+      "opened": 5,
+      "of": 5
+    }
+  }
+}

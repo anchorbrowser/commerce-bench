@@ -1,0 +1,22 @@
+{
+  "id": "nike.com",
+  "site": "nike.com",
+  "region": "us",
+  "category": "fashion",
+  "start_url": "https://www.nike.com/",
+  "product": {
+    "name": "Nike Everyday Cushioned Crew Socks (3 Pairs)",
+    "variant": "White, size M",
+    "quantity": 1,
+    "match": [
+      "everyday",
+      "cushioned",
+      "crew"
+    ],
+    "variant_match": [
+      "white"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

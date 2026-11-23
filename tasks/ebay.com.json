@@ -1,0 +1,19 @@
+{
+  "id": "ebay.com",
+  "site": "ebay.com",
+  "region": "us",
+  "category": "marketplace",
+  "start_url": "https://www.ebay.com/",
+  "product": {
+    "name": "Duracell Coppertop AA Batteries, new, Buy It Now",
+    "variant": "8 pack",
+    "quantity": 1,
+    "match": [
+      "duracell",
+      "aa"
+    ],
+    "variant_match": []
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}

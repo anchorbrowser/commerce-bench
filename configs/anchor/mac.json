@@ -1,0 +1,14 @@
+{
+  "session": {
+    "hardware": "mac",
+    "proxy": {
+      "active": true,
+      "country_code": "us"
+    }
+  },
+  "browser": {
+    "captcha_solver": {
+      "active": true
+    }
+  }
+}

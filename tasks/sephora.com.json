@@ -1,0 +1,23 @@
+{
+  "id": "sephora.com",
+  "site": "sephora.com",
+  "region": "us",
+  "category": "beauty",
+  "start_url": "https://www.sephora.com/",
+  "product": {
+    "name": "LANEIGE Lip Sleeping Mask",
+    "variant": "Berry",
+    "quantity": 1,
+    "match": [
+      "laneige",
+      "lip",
+      "sleeping",
+      "mask"
+    ],
+    "variant_match": [
+      "berry"
+    ]
+  },
+  "stop_at": "shipping",
+  "status": "draft"
+}
