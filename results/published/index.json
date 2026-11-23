@@ -1,6 +1,12 @@
 {
   "date": "2026-11-23",
   "agent": "examples/llm-agent.ts (claude-opus-5-5)",
+  "tasks_being_replaced": [
+    "asos.com",
+    "diy.com",
+    "hp.com",
+    "nike.com"
+  ],
   "sets": [
     {
       "setup": "local-chromium",

@@ -35,13 +35,16 @@ function summarize(runs) {
   return Object.fromEntries(
     Object.entries(cells).map(([site, own]) => {
       const reached = Math.max(...own.map((run) => rank(run.furthest_stage)));
+      const passed = own.filter((run) => run.pass).length * 2 > own.length;
+      const signIn = own.filter((run) => run.outcome === 'login_required').length * 2 >= own.length;
       return [
         site,
         {
           runs: own.length,
-          passed: own.filter((run) => run.pass).length * 2 > own.length,
+          passed,
           reached,
           walled: reached < 0 && own.every((run) => isWall(run.outcome)),
+          ending: passed ? 'finished' : reached < 0 ? 'blocked' : signIn ? 'signin' : 'agent',
         },
       ];
     })
@@ -112,10 +115,12 @@ for (const theme of Object.keys(THEMES)) {
   fs.writeFileSync(file, render(theme));
   console.log(`wrote ${path.relative(root, file)}`);
 }
+const replaced = new Set(JSON.parse(fs.readFileSync(path.join(published, 'index.json'), 'utf8')).tasks_being_replaced ?? []);
 for (const row of rows) {
-  const cells = Object.values(row.cells);
-  const count = (test) => cells.filter(test).length;
+  const scored = Object.entries(row.cells).filter(([site]) => !replaced.has(site));
+  const sites = (ending) => scored.filter(([, cell]) => cell.ending === ending).map(([site]) => site);
+  const blocked = sites('blocked');
   console.log(
-    `${row.label}: ${cells.length} stores, finished ${count((cell) => cell.passed)}, past the start page ${count((cell) => cell.reached >= 0)}, reached checkout ${count((cell) => cell.reached >= 2)}, walled ${count((cell) => cell.walled)}`
+    `${row.label}: got in ${scored.length - blocked.length} of ${scored.length}, finished ${sites('finished').length}, agent did not finish ${sites('agent').length}, sign-in required ${sites('signin').length}, did not get in ${blocked.length} (${blocked.join(', ')})`
   );
 }

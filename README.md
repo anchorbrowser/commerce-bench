@@ -27,13 +27,15 @@ Three things it does that a self-reported score does not:
 
 ## Results so far
 
-One reference agent, one task per store: find the named product, put it in the cart, check out as a guest and get the shipping details accepted. Same agent, same thirty stores, three browsers.
+One small reference agent, one task per store: find the named product, put it in the cart, check out as a guest and get the shipping details accepted. Same agent, same stores, three browsers. Getting in is the browser's job. Finishing after that is the agent's.
 
-| Browser | Stores where the agent finished | Got past the start page | Reached checkout | Runs per store |
-|---|---|---|---|---|
-| Anchor on Mac hardware | **10 of 30** | 24 | 16 | 1 |
-| Anchor, default session | 7 of 30 | 17 | 11 | 3 |
-| Chromium on a laptop | 6 of 30 | 12 | 8 | 3 |
+| Browser | Got the agent into the store | Browser did not get in | Agent then finished the task |
+|---|---|---|---|
+| Anchor on Mac hardware | **21 of 26** | 5 | 10 |
+| Anchor, default session | 14 of 26 | 12 | 7 |
+| Chromium on a laptop | 12 of 26 | 14 | 6 |
+
+<sub>26 stores scored. Four more are in the grid but left out of the table, because the product named in the task could not be bought as written. Those tasks are being replaced.</sub>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/results-dark.svg">
@@ -42,8 +44,9 @@ One reference agent, one task per store: find the named product, put it in the c
 
 What stands out:
 
-- **The browser decides more than the agent does.** The agent never changed. Sephora and Uniqlo refused it at the start page on a laptop and on a default session, and it finished both on Mac hardware. Lego and Staples went from blocked or stuck on a laptop to finished on Anchor.
-- **Five stores stopped every browser.** Target, Walmart, Wayfair and Smyths Toys showed a bot wall each time, and Micro Center never got as far as a product page. Those are the open problems.
+- **The browser decides whether the agent gets a chance.** The agent never changed. A laptop browser was turned away at 14 stores, Anchor on Mac hardware at 5. Sephora and Uniqlo refused the agent at the start page on the other two browsers and went all the way to accepted shipping details on Mac hardware.
+- **Past the door, the limit is the agent.** On Mac hardware the reference agent finished 10 of the 21 stores it got into. In 10 it stalled in the cart or checkout, and one store demands an account. The reference agent is a bundled example, about 300 lines. A stronger agent moves that number with no change to the browser.
+- **Five stores still stop Anchor on Mac hardware.** Target, Walmart, Wayfair and Smyths Toys showed a bot wall, and Micro Center never loaded a product page. Those are the open problems for the browser.
 - **The agent claims more than it did.** 11 of 210 runs ended as `false_completion`: the agent said it was done and the browser showed otherwise. A self-reported score would have counted them as passes.
 - **Nothing was bought.** 210 runs, no card entered, no order placed, zero guard breaches.
 
@@ -59,7 +62,7 @@ Recordings of six of the runs that finished, straight from the Anchor sessions:
 
 <sub>Anchor session recordings, played at 10x. Shopper details are placeholders. No card was entered and no order was placed.</sub>
 
-Every run is in [`results/published/`](results/published/), with the conditions it ran under and what not to read into it. One day, one agent, and one run per store on Mac hardware against three on the others, so a single cell can flip on a repeat. Four of the thirty tasks name a product that could not be bought as written and are being replaced. Run it yourself before you quote a number.
+Every run is in [`results/published/`](results/published/), with the conditions it ran under and what not to read into it. One day, one agent, and one run per store on Mac hardware against three on the others, so a single cell can flip on a repeat. A store counts as entered when the agent reached a product page in at least one run. Run it yourself before you quote a number.
 
 ## Quick start
 
