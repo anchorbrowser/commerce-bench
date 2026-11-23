@@ -13,7 +13,7 @@
 
 <br><br>
 
-[First results](#what-the-first-runs-found) · [Quick start](#quick-start) · [How it works](#how-it-works) · [Connect your agent](#connect-your-agent) · [Compare browsers](#compare-browsers) · [Known limits](#known-limits)
+[Results](#results-so-far) · [Quick start](#quick-start) · [How it works](#how-it-works) · [Connect your agent](#connect-your-agent) · [Compare browsers](#compare-browsers) · [Known limits](#known-limits)
 
 </div>
 
@@ -25,33 +25,41 @@ Three things it does that a self-reported score does not:
 - **It never pays.** Tasks carry no card. Card tokenization and order requests are blocked at the network, and any attempt is recorded.
 - **It gives reasons.** Each run ends with a label such as `bot_detected:cloudflare`, `login_required` or `false_completion`. A pass rate alone hides most of what you need to fix.
 
-## What the first runs found
+## Results so far
 
-Thirty retail sites, the same request, one visit per browser setup, no agent yet. A plain local browser got the start page on 16 of 30. Anchor on Mac hardware got it on 28. The last two each needed one setting change.
+One reference agent, one task per store: find the named product, put it in the cart, check out as a guest and get the shipping details accepted. Same agent, same thirty stores, three browsers.
+
+| Browser | Stores where the agent finished | Got past the start page | Reached checkout | Runs per store |
+|---|---|---|---|---|
+| Anchor on Mac hardware | **10 of 30** | 24 | 16 | 1 |
+| Anchor, default session | 7 of 30 | 17 | 11 | 3 |
+| Chromium on a laptop | 6 of 30 | 12 | 8 | 3 |
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/front-door-dark.svg">
-  <img alt="Grid of 30 stores. For each store, five bars show whether the start page opened on a plain local browser and on four Anchor setups, and a label names the lightest Anchor setup that opened it." src="assets/front-door-light.svg" width="880">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/results-dark.svg">
+  <img alt="Grid of 30 stores. Each store has three rows of five bars, one row per browser, showing how far the reference agent got: product, cart, checkout, shipping details accepted, payment page. Green rows finished the task." src="assets/results-light.svg" width="880">
 </picture>
 
-| Setup | Stores opened | Session settings |
-|---|---|---|
-| Local Chromium | 16 of 30 | none |
-| Anchor, default session | 21 of 30 | [`configs/anchor/default.json`](configs/anchor/default.json) |
-| Anchor, proxy + extra stealth + captcha solving | 23 of 30 | [`configs/anchor/stealth.json`](configs/anchor/stealth.json) |
-| Anchor, residential proxy + stealth | 24 of 30 | [`configs/anchor/residential.json`](configs/anchor/residential.json) |
-| Anchor, Mac hardware | 28 of 30 | [`configs/anchor/mac.json`](configs/anchor/mac.json) |
+What stands out:
 
-Most runs that fail, fail here, before the agent has done anything. Then the full task: the bundled reference agent finding a product, filling the cart and getting shipping details accepted, with the harness watching.
+- **The browser decides more than the agent does.** The agent never changed. Sephora and Uniqlo refused it at the start page on a laptop and on a default session, and it finished both on Mac hardware. Lego and Staples went from blocked or stuck on a laptop to finished on Anchor.
+- **Five stores stopped every browser.** Target, Walmart, Wayfair and Smyths Toys showed a bot wall each time, and Micro Center never got as far as a product page. Those are the open problems.
+- **The agent claims more than it did.** 11 of 210 runs ended as `false_completion`: the agent said it was done and the browser showed otherwise. A self-reported score would have counted them as passes.
+- **Nothing was bought.** 210 runs, no card entered, no order placed, zero guard breaches.
 
-| lego.com | staples.com | lookfantastic.com |
+Recordings of six of the runs that finished, straight from the Anchor sessions:
+
+| sephora.com | uniqlo.com | lookfantastic.com |
 |---|---|---|
-| ![Recording of the reference agent shopping lego.com through Anchor](results/published/recordings/lego-anchor-default.gif) | ![Recording of the reference agent shopping staples.com through Anchor](results/published/recordings/staples-anchor-default.gif) | ![Recording of the reference agent shopping lookfantastic.com on Anchor Mac hardware](results/published/recordings/lookfantastic-anchor-mac.gif) |
-| Walled by Cloudflare on a local browser. Passed on an Anchor default session. | Access denied at checkout on a local browser. Passed on an Anchor default session. | Guest checkout stalled on every other setup. Passed on Anchor Mac hardware. |
+| ![Recording of the reference agent shopping sephora.com on Anchor Mac hardware](results/published/recordings/sephora-anchor-mac.gif) | ![Recording of the reference agent shopping uniqlo.com on Anchor Mac hardware](results/published/recordings/uniqlo-anchor-mac.gif) | ![Recording of the reference agent shopping lookfantastic.com on Anchor Mac hardware](results/published/recordings/lookfantastic-anchor-mac.gif) |
+| Bot wall on a laptop and on a default session. Finished on Mac hardware. | Bot wall on a laptop and on a default session. Finished on Mac hardware. | Guest checkout stalled on the other two. Finished on Mac hardware. |
+| **lego.com** | **staples.com** | **bestbuy.com** |
+| ![Recording of the reference agent shopping lego.com through Anchor](results/published/recordings/lego-anchor-default.gif) | ![Recording of the reference agent shopping staples.com through Anchor](results/published/recordings/staples-anchor-default.gif) | ![Recording of the reference agent shopping bestbuy.com on Anchor Mac hardware](results/published/recordings/bestbuy-anchor-mac.gif) |
+| Cloudflare wall on a laptop. Finished on an Anchor default session. | Access denied at checkout on a laptop. Finished on an Anchor default session. | Finished on all three. Shown for a full run from search to shipping. |
 
 <sub>Anchor session recordings, played at 10x. Shopper details are placeholders. No card was entered and no order was placed.</sub>
 
-Every run behind these numbers is in [`results/published/`](results/published/), with the conditions it ran under and what not to read into it. These are first results from one day, one agent and one to three runs per cell. Treat them as a starting point.
+Every run is in [`results/published/`](results/published/), with the conditions it ran under and what not to read into it. One day, one agent, and one run per store on Mac hardware against three on the others, so a single cell can flip on a repeat. Four of the thirty tasks name a product that could not be bought as written and are being replaced. Run it yourself before you quote a number.
 
 ## Quick start
 
@@ -252,6 +260,25 @@ npm run bench -- report --in results/local,results/anchor --out results/compare
 The report shows `my-agent@local` and `my-agent@anchor` side by side: the same funnel, the same sites, and the walls each one met. The harness does not rank browsers. It shows what your agent ran into on each.
 
 The CDP URL goes to your agent and nowhere else. It is not written to results, and it is removed from the saved agent log.
+
+### Which setup opens which store
+
+Before any agent runs, it helps to know which stores let a browser in at all. Each start page was opened once per setup, with no agent:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/front-door-dark.svg">
+  <img alt="Grid of 30 stores. For each store, five bars show whether the start page opened on a plain local browser and on four Anchor setups, and a label names the lightest Anchor setup that opened it." src="assets/front-door-light.svg" width="880">
+</picture>
+
+| Setup | Stores opened | Session settings |
+|---|---|---|
+| Local Chromium | 16 of 30 | none |
+| Anchor, default session | 21 of 30 | [`configs/anchor/default.json`](configs/anchor/default.json) |
+| Anchor, proxy + extra stealth + captcha solving | 23 of 30 | [`configs/anchor/stealth.json`](configs/anchor/stealth.json) |
+| Anchor, residential proxy + stealth | 24 of 30 | [`configs/anchor/residential.json`](configs/anchor/residential.json) |
+| Anchor, Mac hardware | 28 of 30 | [`configs/anchor/mac.json`](configs/anchor/mac.json) |
+
+One visit per cell. The label on each store is the lightest Anchor setup that opened it, which is the cheapest place to start. Rebuild this for your own network with `examples/agents/open-only.json`.
 
 ## Two tracks
 

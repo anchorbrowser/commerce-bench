@@ -9,16 +9,17 @@ First results from Commerce Bench. One day, one agent, one network. Read the lim
 | `front-door.json` | Each store start page opened once per browser setup, no agent. `opened`, or the outcome label that came back |
 | `runs-local-chromium.jsonl` | The reference agent on local headless Chromium, 30 stores, 3 runs each |
 | `runs-anchor-default.jsonl` | The same agent on an Anchor default session, 30 stores, 3 runs each |
-| `runs-anchor-mac.jsonl` | The same agent on Anchor Mac hardware. In progress, see `index.json` for how many stores it covers |
+| `runs-anchor-mac.jsonl` | The same agent on Anchor Mac hardware, 30 stores, 1 run each. The five UK stores left from a UK address |
 | `index.json` | Run counts per file |
-| `recordings/` | Three Anchor session recordings as short GIFs, 10x speed |
+| `recordings/` | Six Anchor session recordings as short GIFs, 10x speed |
 
 Each line of a `runs-*.jsonl` file is one run record as described in `schema/`. Checkout session ids are replaced with `[id]`.
 
-The store grid in the main README is built from `front-door.json`:
+The two grids in the main README are built from these files:
 
 ```sh
-node scripts/front-door-matrix.mjs
+node scripts/results-matrix.mjs      # agent runs, from the runs-*.jsonl files
+node scripts/front-door-matrix.mjs   # start pages, from front-door.json
 ```
 
 ## How these were run
@@ -30,7 +31,7 @@ node scripts/front-door-matrix.mjs
 
 ## Limits
 
-- **Small sample.** One visit per cell in `front-door.json`. Three runs per store in the agent files. Stores flip between runs: `smythstoys.com` opened on Mac hardware with a UK exit in the front-door pass and was walled in the agent run an hour later.
+- **Small sample.** One visit per cell in `front-door.json`. Three runs per store on local Chromium and the Anchor default session, one run per store on Mac hardware. Stores flip between runs: `smythstoys.com` opened on Mac hardware with a UK exit in the front-door pass and was walled in the agent run an hour later.
 - **Geography is mixed in.** Local runs left from a network in India. Anchor sessions left from the US, or the UK where the file name says so. Part of any gap between local and Anchor is location.
 - **One generic config per setup.** No store-specific tuning beyond what Anchor applies itself through `session.domain`.
 - **One agent.** A different agent changes every number past the front door.

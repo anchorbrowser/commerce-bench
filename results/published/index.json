@@ -16,9 +16,9 @@
     },
     {
       "setup": "anchor-mac",
-      "runs": 15,
-      "stores": 15,
-      "passed_runs": 5
+      "runs": 30,
+      "stores": 30,
+      "passed_runs": 10
     }
   ]
 }
