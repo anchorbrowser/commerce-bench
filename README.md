@@ -278,7 +278,7 @@ Before any agent runs, it helps to know which stores let a browser in at all. Ea
 | Anchor, residential proxy + stealth | 24 of 30 | [`configs/anchor/residential.json`](configs/anchor/residential.json) |
 | Anchor, Mac hardware | 28 of 30 | [`configs/anchor/mac.json`](configs/anchor/mac.json) |
 
-One visit per cell. The label on each store is the lightest Anchor setup that opened it, which is the cheapest place to start. Rebuild this for your own network with `examples/agents/open-only.json`.
+One visit per cell. The label on each store is the lightest Anchor setup that opened it, which is the cheapest place to start. Opening the start page is not the same as staying in: `target.com` and `wayfair.com` opened on Mac hardware here and showed a bot wall again during the full agent run. Rebuild this for your own network with `examples/agents/open-only.json`.
 
 ## Two tracks
 
