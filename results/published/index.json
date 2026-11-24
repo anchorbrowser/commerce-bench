@@ -1,30 +1,304 @@
 {
-  "date": "2026-11-23",
+  "date": "2026-11-24",
   "agent": "examples/llm-agent.ts (claude-opus-5-5)",
-  "tasks_being_replaced": [
-    "asos.com",
-    "diy.com",
-    "hp.com",
-    "nike.com"
-  ],
+  "finished_rule": "A store is finished when more than half of its graded runs pass. harness_error runs are not graded.",
   "sets": [
     {
       "setup": "local-chromium",
       "runs": 90,
+      "graded_runs": 89,
       "stores": 30,
-      "passed_runs": 16
+      "passed_runs": 20,
+      "stores_finished": 7
     },
     {
       "setup": "anchor-default",
       "runs": 90,
+      "graded_runs": 81,
       "stores": 30,
-      "passed_runs": 21
+      "passed_runs": 36,
+      "stores_finished": 14
+    },
+    {
+      "setup": "anchor-stealth",
+      "runs": 18,
+      "graded_runs": 15,
+      "stores": 6,
+      "passed_runs": 2,
+      "stores_finished": 1
+    },
+    {
+      "setup": "anchor-residential",
+      "runs": 21,
+      "graded_runs": 20,
+      "stores": 7,
+      "passed_runs": 3,
+      "stores_finished": 1
     },
     {
       "setup": "anchor-mac",
-      "runs": 30,
+      "runs": 90,
+      "graded_runs": 88,
       "stores": 30,
-      "passed_runs": 10
+      "passed_runs": 47,
+      "stores_finished": 17
+    },
+    {
+      "setup": "anchor-best",
+      "runs": 90,
+      "graded_runs": 84,
+      "stores": 30,
+      "passed_runs": 54,
+      "stores_finished": 19
     }
-  ]
+  ],
+  "all_runs": {
+    "rows": 543,
+    "guard_breaches": 0,
+    "batches": [
+      {
+        "batch": "full-local",
+        "setup": "local-chromium",
+        "file": "all-runs/full-local.jsonl",
+        "rows": 95,
+        "harness_errors": 0,
+        "passed": 16,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v6/local",
+        "setup": "local-chromium",
+        "file": "all-runs/rerun-v6--local.jsonl",
+        "rows": 30,
+        "harness_errors": 1,
+        "passed": 6,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "full-anchor",
+        "setup": "anchor-default",
+        "file": "all-runs/full-anchor.jsonl",
+        "rows": 96,
+        "harness_errors": 0,
+        "passed": 21,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v6/anchor1",
+        "setup": "anchor-default",
+        "file": "all-runs/rerun-v6--anchor1.jsonl",
+        "rows": 15,
+        "harness_errors": 3,
+        "passed": 10,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v6/anchor2",
+        "setup": "anchor-default",
+        "file": "all-runs/rerun-v6--anchor2.jsonl",
+        "rows": 15,
+        "harness_errors": 4,
+        "passed": 5,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v8/anchor",
+        "setup": "anchor-default",
+        "file": "all-runs/rerun-v8--anchor.jsonl",
+        "rows": 12,
+        "harness_errors": 1,
+        "passed": 5,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v10/anchor1",
+        "setup": "anchor-default",
+        "file": "all-runs/rerun-v10--anchor1.jsonl",
+        "rows": 3,
+        "harness_errors": 0,
+        "passed": 0,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v10/anchor2",
+        "setup": "anchor-default",
+        "file": "all-runs/rerun-v10--anchor2.jsonl",
+        "rows": 6,
+        "harness_errors": 2,
+        "passed": 2,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v11/anchor1",
+        "setup": "anchor-default",
+        "file": "all-runs/rerun-v11--anchor1.jsonl",
+        "rows": 3,
+        "harness_errors": 0,
+        "passed": 1,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v11/anchor2",
+        "setup": "anchor-default",
+        "file": "all-runs/rerun-v11--anchor2.jsonl",
+        "rows": 3,
+        "harness_errors": 3,
+        "passed": 0,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v7/stealth",
+        "setup": "anchor-stealth",
+        "file": "all-runs/rerun-v7--stealth.jsonl",
+        "rows": 15,
+        "harness_errors": 3,
+        "passed": 2,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v9/stealth",
+        "setup": "anchor-stealth",
+        "file": "all-runs/rerun-v9--stealth.jsonl",
+        "rows": 6,
+        "harness_errors": 0,
+        "passed": 0,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v7/residential",
+        "setup": "anchor-residential",
+        "file": "all-runs/rerun-v7--residential.jsonl",
+        "rows": 21,
+        "harness_errors": 2,
+        "passed": 3,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v9/residential",
+        "setup": "anchor-residential",
+        "file": "all-runs/rerun-v9--residential.jsonl",
+        "rows": 9,
+        "harness_errors": 0,
+        "passed": 0,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "full-mac-v3/a",
+        "setup": "anchor-mac",
+        "file": "all-runs/full-mac-v3--a.jsonl",
+        "rows": 41,
+        "harness_errors": 11,
+        "passed": 9,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "full-mac-v3/b",
+        "setup": "anchor-mac",
+        "file": "all-runs/full-mac-v3--b.jsonl",
+        "rows": 59,
+        "harness_errors": 31,
+        "passed": 16,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "full-mac-v3/c",
+        "setup": "anchor-mac",
+        "file": "all-runs/full-mac-v3--c.jsonl",
+        "rows": 36,
+        "harness_errors": 6,
+        "passed": 11,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "full-mac-v4/uk",
+        "setup": "anchor-mac",
+        "file": "all-runs/full-mac-v4--uk.jsonl",
+        "rows": 6,
+        "harness_errors": 1,
+        "passed": 0,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "full-mac-v4/us1",
+        "setup": "anchor-mac",
+        "file": "all-runs/full-mac-v4--us1.jsonl",
+        "rows": 12,
+        "harness_errors": 0,
+        "passed": 5,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "full-mac-v4/us2",
+        "setup": "anchor-mac",
+        "file": "all-runs/full-mac-v4--us2.jsonl",
+        "rows": 12,
+        "harness_errors": 3,
+        "passed": 1,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "full-mac-v5/uk",
+        "setup": "anchor-mac",
+        "file": "all-runs/full-mac-v5--uk.jsonl",
+        "rows": 3,
+        "harness_errors": 0,
+        "passed": 0,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "full-mac-v5/us1",
+        "setup": "anchor-mac",
+        "file": "all-runs/full-mac-v5--us1.jsonl",
+        "rows": 6,
+        "harness_errors": 1,
+        "passed": 5,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "full-mac-v5/us2",
+        "setup": "anchor-mac",
+        "file": "all-runs/full-mac-v5--us2.jsonl",
+        "rows": 6,
+        "harness_errors": 0,
+        "passed": 3,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v6/mac",
+        "setup": "anchor-mac",
+        "file": "all-runs/rerun-v6--mac.jsonl",
+        "rows": 3,
+        "harness_errors": 0,
+        "passed": 2,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v8/mac",
+        "setup": "anchor-mac",
+        "file": "all-runs/rerun-v8--mac.jsonl",
+        "rows": 15,
+        "harness_errors": 0,
+        "passed": 3,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v8/mac-gb",
+        "setup": "anchor-mac",
+        "file": "all-runs/rerun-v8--mac-gb.jsonl",
+        "rows": 9,
+        "harness_errors": 0,
+        "passed": 1,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v10/mac",
+        "setup": "anchor-mac",
+        "file": "all-runs/rerun-v10--mac.jsonl",
+        "rows": 6,
+        "harness_errors": 1,
+        "passed": 2,
+        "guard_breaches": 0
+      }
+    ]
+  }
 }

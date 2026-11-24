@@ -32,42 +32,61 @@ Three things it does that a self-reported score does not:
 
 ## Results so far
 
-One small reference agent, one task per store: find the named product, put it in the cart, check out as a guest and get the shipping details accepted. Same agent, same stores, three browsers. Getting in is the browser's job. Finishing after that is the agent's.
+One small reference agent, one task per store: find the named product, put it in the cart, check out as a guest and get the shipping details accepted. Same agent, same stores, same grader. Only the browser changed. Getting in is the browser's job. Finishing after that is the agent's.
 
-| Browser | Got the agent into the store | Browser did not get in | Agent then finished the task |
-|---|---|---|---|
-| Anchor on Mac hardware | **21 of 26** | 5 | 10 |
-| Anchor, default session | 14 of 26 | 12 | 7 |
-| Chromium on a laptop | 12 of 26 | 14 | 6 |
+<!-- results:begin -->
+| Browser | Stores finished | Runs passed | Turned away | Store needs an account | Got in, agent did not finish |
+|---|---|---|---|---|---|
+| **Anchor, best setup per store** | **19 of 30** | 54 of 84 | 5 | 2 | 4 |
+| Anchor on Mac hardware | 17 of 30 | 47 of 88 | 5 | 1 | 7 |
+| Anchor, default session | 14 of 30 | 36 of 81 | 13 | 1 | 2 |
+| Chromium on a laptop | 7 of 30 | 20 of 89 | 18 | 1 | 4 |
 
-<sub>26 stores scored. Four more are in the grid but left out of the table, because the product named in the task could not be bought as written. Those tasks are being replaced.</sub>
+<sub>30 stores, 3 runs per store on each browser. A store counts as finished when more than half of its graded runs pass. Runs where the harness itself failed (`harness_error`) are not graded. "Turned away" means the agent never reached a product page, or a bot wall or error page ended most runs. Best setup per store takes, for each store, the Anchor setup with the most passing runs. On a tie it takes the setup whose runs got furthest, then the lightest. It is picked after the runs, so read it as a guide to which setup to use for a store, not as one fixed configuration.</sub>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/results-dark.svg">
-  <img alt="Grid of 30 stores. Each store has three rows of five bars, one row per browser, showing how far the reference agent got: product, cart, checkout, shipping details accepted, payment page. Green rows finished the task." src="assets/results-light.svg" width="880">
+  <img alt="Grid of 30 stores. Each store has 4 rows of five bars, one row per browser (Anchor, best setup per store, Anchor on Mac hardware, Anchor, default session, Chromium on a laptop), showing how far the reference agent got: product, cart, checkout, shipping details accepted, payment page. Green rows finished the task." src="assets/results-light.svg" width="880">
 </picture>
 
 What stands out:
 
-- **The browser decides whether the agent gets a chance.** The agent never changed. A laptop browser was turned away at 14 stores, Anchor on Mac hardware at 5. Sephora and Uniqlo refused the agent at the start page on the other two browsers and went all the way to accepted shipping details on Mac hardware.
-- **Past the door, the limit is the agent.** On Mac hardware the reference agent finished 10 of the 21 stores it got into. In 10 it stalled in the cart or checkout, and one store demands an account. The reference agent is a bundled example, about 300 lines. A stronger agent moves that number with no change to the browser.
-- **Five stores still stop Anchor on Mac hardware.** Target, Walmart, Wayfair and Smyths Toys showed a bot wall, and Micro Center never loaded a product page. Those are the open problems for the browser.
-- **The agent claims more than it did.** 11 of 210 runs ended as `false_completion`: the agent said it was done and the browser showed otherwise. A self-reported score would have counted them as passes.
-- **Nothing was bought.** 210 runs, no card entered, no order placed, zero guard breaches.
+- **The right Anchor setup per store finishes the most.** With the best setup for each store, the reference agent finished 19 of 30 stores. The strongest single setup, Mac hardware, finished 17. A default Anchor session finished 14 and Chromium on a laptop 7.
+- **The browser decides whether the agent gets a chance.** The agent never changed. A laptop browser was turned away at 18 stores, the best Anchor setup at 5. 9 stores that turned the laptop browser away were finished on Anchor: `asos.com`, `carters.com`, `homedepot.com`, `hp.com`, `lego.com`, `lululemon.com`, `sephora.com`, `staples.com` and `uniqlo.com`.
+- **Two stores need an account.** `amazon.com` and `walmart.com` asked the shopper to sign in before checkout, with no guest path. That is the store's rule, not a browser block. The task asks for guest checkout, so they do not count as finished.
+- **Still open.** Even on the best setup, `ebay.com`, `michaels.com`, `smythstoys.com`, `target.com` and `wayfair.com` turned the agent away with a bot wall or an error page in most runs. In `autozone.com`, `diy.com`, `lookfantastic.com` and `microcenter.com` the agent got in and did not finish. The reference agent is a bundled example of about 260 lines. A stronger agent can move that number with no change to the browser.
+- **No false claims in the published runs.** None of the 309 published runs ended as `false_completion`.
+- **Nothing was bought.** 543 runs recorded, superseded reruns included. No card entered, no order placed, zero guard breaches.
+
+### Which Anchor setup finished which store
+
+| Setup | Session settings | Count | Stores finished |
+|---|---|---|---|
+| Anchor, default session | [`configs/anchor/default.json`](configs/anchor/default.json) | 10 | asos.com, barnesandnoble.com, bestbuy.com, dunelm.com, elfcosmetics.com, ikea.com, petsmart.com, quince.com, staples.com, ulta.com |
+| Anchor on Mac hardware | [`configs/anchor/mac.json`](configs/anchor/mac.json) | 9 | apple.com, carters.com, homedepot.com, hp.com, lego.com, lululemon.com, nike.com, sephora.com, uniqlo.com |
+
+Each store is listed once, under the setup with the most passing runs, the lightest on a tie. A heavier setup may also have finished it. The rows for every setup are in [`results/published/`](results/published/), and the pick for each store is in [`best-setup.json`](results/published/best-setup.json). Not finished on any Anchor setup tried yet, leaving out the stores that need an account: `autozone.com` (Mac hardware, 0 of 3 runs passed), `diy.com` (default session, 0 of 0 runs passed), `ebay.com` (default session, 0 of 3 runs passed), `lookfantastic.com` (default session, 1 of 3 runs passed), `michaels.com` (residential proxy + stealth, 0 of 3 runs passed), `microcenter.com` (proxy + extra stealth + captcha solving, 0 of 3 runs passed), `smythstoys.com` (default session, 0 of 3 runs passed), `target.com` (proxy + extra stealth + captcha solving, 0 of 3 runs passed), `wayfair.com` (default session, 0 of 3 runs passed).
+
+To repeat one, for example `apple.com`:
+
+```sh
+npm run bench -- run --agent examples/agents/llm-claude.json --browser anchor --anchor-config configs/anchor/mac.json --site apple.com --runs 3
+```
+<!-- results:end -->
 
 Recordings of six of the runs that finished, straight from the Anchor sessions:
 
 | sephora.com | uniqlo.com | lookfantastic.com |
 |---|---|---|
 | ![Recording of the reference agent shopping sephora.com on Anchor Mac hardware](results/published/recordings/sephora-anchor-mac.gif) | ![Recording of the reference agent shopping uniqlo.com on Anchor Mac hardware](results/published/recordings/uniqlo-anchor-mac.gif) | ![Recording of the reference agent shopping lookfantastic.com on Anchor Mac hardware](results/published/recordings/lookfantastic-anchor-mac.gif) |
-| Bot wall on a laptop and on a default session. Finished on Mac hardware. | Bot wall on a laptop and on a default session. Finished on Mac hardware. | Guest checkout stalled on the other two. Finished on Mac hardware. |
+| Bot wall on a laptop and on a default session. Finished on Mac hardware. | Bot wall on a laptop and on a default session. Finished on Mac hardware. | A passing run on Mac hardware from the first pass. Later repeats stalled in checkout, so the store is not counted as finished. |
 | **lego.com** | **staples.com** | **bestbuy.com** |
 | ![Recording of the reference agent shopping lego.com through Anchor](results/published/recordings/lego-anchor-default.gif) | ![Recording of the reference agent shopping staples.com through Anchor](results/published/recordings/staples-anchor-default.gif) | ![Recording of the reference agent shopping bestbuy.com on Anchor Mac hardware](results/published/recordings/bestbuy-anchor-mac.gif) |
-| Cloudflare wall on a laptop. Finished on an Anchor default session. | Access denied at checkout on a laptop. Finished on an Anchor default session. | Finished on all three. Shown for a full run from search to shipping. |
+| Cloudflare wall on a laptop. Finished on an Anchor default session. | Access denied at checkout on a laptop. Finished on an Anchor default session. | Finished on a laptop, on a default session and on Mac hardware. Shown for a full run from search to shipping. |
 
 <sub>Anchor session recordings, played at 10x. Shopper details are placeholders. No card was entered and no order was placed.</sub>
 
-Every run is in [`results/published/`](results/published/), with the conditions it ran under and what not to read into it. One day, one agent, and one run per store on Mac hardware against three on the others, so a single cell can flip on a repeat. A store counts as entered when the agent reached a product page in at least one run. Run it yourself before you quote a number.
+Every run is in [`results/published/`](results/published/), with the conditions it ran under and what not to read into it. That includes every failed, frozen and superseded run, in [`all-runs/`](results/published/all-runs/). One agent, runs from 23 and 24 November 2026, three runs per store per setup, so a single cell can flip on a repeat. Run it yourself before you quote a number.
 
 ## Quick start
 
@@ -389,8 +408,8 @@ The shopper files hold placeholder details: an `example.com` email, a reserved t
 
 ## Known limits
 
-- All 30 site tasks are marked `draft`. The reference agent has run every one of them on local Chromium and on Anchor, three times each. Four tasks (`asos.com`, `diy.com`, `hp.com`, `nike.com`) named a product that was not purchasable as written. They now name a different one, checked against the store's product page but not yet run through a full checkout, so they stay out of the published totals.
-- Stage detection uses general rules. Eleven were corrected after the first live runs (a tracking pixel read as add-to-cart, a checkout served at a cart URL, a total labelled "incl. tax", a challenge inside a frame read as a loaded page, and others), and more sites will surface more cases. A one-page checkout that shows no delivery options and no address summary will not reach `shipping` without a per-site pattern.
+- All 30 site tasks are marked `draft`. The reference agent has run every one of them three times on local Chromium, on an Anchor default session and on Anchor Mac hardware. Four tasks (`asos.com`, `diy.com`, `hp.com`, `nike.com`) got a new product after the first pass because the old one could not be bought as written. They have been run with the new product and are scored like the rest.
+- Stage detection uses general rules. Eleven were corrected after the first live runs (a tracking pixel read as add-to-cart, a checkout served at a cart URL, a total labelled "incl. tax", a challenge inside a frame read as a loaded page, and others), and more on 24 November for one-page checkouts, checkout totals and addresses shown back as page text. More sites will surface more cases. A checkout that shows no delivery options, no address and no shipping quote will not reach `shipping` without a per-site pattern.
 - Results move between runs. The same store can open on one visit and wall the next. Use three runs per store before drawing a conclusion.
 - The cart check confirms the product is in the cart. It records whether the variant text was seen, but does not fail a run on it and does not count extra items.
 - Request blocking covers known card processors and order URLs. A card payload sent to a merchant's own endpoint is recorded as a breach but may not be blocked.
@@ -409,7 +428,7 @@ examples/    reference agents: scripted (mock shop), open-only, Claude loop, ass
 mockshop/    local store used by selftest, with planted traps
 schema/      JSON Schemas for the task, the result and the leaderboard
 scripts/     builds the store grid image from published results
-results/     published/ holds the first results; your own runs land here too and stay out of git
+results/     published/ holds the published results and every raw run; your own runs land here too and stay out of git
 test/        unit tests for the grader and the stage rules
 ```
 
