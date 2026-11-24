@@ -241,7 +241,7 @@ The parser also accepts the result wrapped inside another object, or as a JSON s
 
 </details>
 
-`examples/llm-agent.ts` is a complete agent in about 200 lines: a Claude tool-use loop over a numbered list of page elements. Copy it as a starting point, or use it as a baseline to beat.
+`examples/llm-agent.ts` is a complete agent in about 260 lines: a Claude tool-use loop over a numbered list of page elements. Copy it as a starting point, or use it as a baseline to beat.
 
 ## Compare browsers
 
