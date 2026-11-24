@@ -107,7 +107,7 @@ test('a payment question after the details counts as moving on to payment', () =
   assert.deepEqual(stages(evidence), ['checkout', 'shipping', 'payment']);
 });
 
-test('a single-page checkout counts as shipping once the quote changes after the details settle', () => {
+test('a single-page checkout counts as shipping once it quotes shipping and the details have settled', () => {
   const page = (text: string) => snapshot('/checkout', { text, fields: contactFields });
   const quoted = 'Shipping $7.50 Order total $19.50 Place order';
   const evidence = new Evidence(config);
@@ -119,9 +119,9 @@ test('a single-page checkout counts as shipping once the quote changes after the
   assert.deepEqual(stages(evidence), ['checkout']);
   evidence.observePage(1, page(`We could not verify your address ${quoted}`), 9_000);
   assert.deepEqual(stages(evidence), ['checkout']);
-  evidence.observePage(1, page(quoted), 9_000);
+  evidence.observePage(1, page(quoted), 4_000);
   assert.deepEqual(stages(evidence), ['checkout']);
-  evidence.observePage(1, page('Shipping $7.50 Estimated tax $1.07 Order total $20.57 Place order'), 9_500);
+  evidence.observePage(1, page(quoted), 9_000);
   assert.deepEqual(stages(evidence), ['checkout', 'shipping']);
 });
 

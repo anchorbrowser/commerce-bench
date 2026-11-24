@@ -115,6 +115,8 @@ test('reported track needs a screenshot and never passes past the stop stage', (
   const afterTax: AgentResult = { status: 'completed', claimed_stage: 'shipping', reported_total: { amount: 20.69, currency: 'USD' } };
   assert.equal(classifyObserved({ probe: cartTotal, agent: afterTax, stopAt: 'shipping', timedOut: false }).total_check, 'unverified');
   assert.equal(observed({ probe: cartTotal, agent: afterTax, stopAt: 'shipping', timedOut: false }), 'pass');
+  assert.equal(parseTotal('Order total $20.69 Your total today $0.00')?.amount, 20.69);
+  assert.equal(parseTotal('Total $0.00'), null);
   assert.equal(checkTotal(undefined, null), 'not_reported');
   assert.equal(checkTotal({ amount: 20.69, currency: 'USD' }, { amount: 20.26, currency: 'USD' }), 'mismatch');
   assert.equal(checkTotal({ amount: 20.69, currency: 'USD' }, { amount: 20.26, currency: 'USD' }, [20.26, 20.69]), 'match');

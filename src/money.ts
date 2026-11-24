@@ -14,7 +14,7 @@ export function parseTotal(text: string): Money | null {
     for (const match of text.matchAll(pattern)) {
       if (NOT_A_TOTAL.test(match[1].replace(/\([^)]*\)/g, ''))) continue;
       const amount = toAmount(match[4]);
-      if (Number.isFinite(amount)) found = { amount, currency: match[2] ?? SYMBOL_CURRENCY[match[3]] ?? null };
+      if (Number.isFinite(amount) && amount > 0) found = { amount, currency: match[2] ?? SYMBOL_CURRENCY[match[3]] ?? null };
     }
     if (found) return found;
   }

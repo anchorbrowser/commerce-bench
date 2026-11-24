@@ -16,5 +16,11 @@
     "variant_match": []
   },
   "stop_at": "shipping",
-  "status": "draft"
+  "status": "draft",
+  "patterns": {
+    "checkout": [
+      "OrderShippingBillingView",
+      "checkout"
+    ]
+  }
 }

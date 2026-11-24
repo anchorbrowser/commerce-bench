@@ -18,5 +18,11 @@
     ]
   },
   "stop_at": "shipping",
-  "status": "draft"
+  "status": "draft",
+  "patterns": {
+    "checkout": [
+      "secure\\.asos\\.com",
+      "checkout"
+    ]
+  }
 }

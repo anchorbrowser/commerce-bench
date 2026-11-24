@@ -72,8 +72,7 @@ const PAYMENT_QUESTION = /how (?:do|would) you (?:want|like) to pay/i;
 const ORDER_BUTTON = /place (?:your |my )?order|pay now|complete (?:order|purchase)/i;
 const SHIPPING_QUOTED =
   /\b(?:shipping|delivery)(?: method| cost)?:?(?: (?:standard|ground|economy|express))? (?:free\b|[$£€] ?\d)|\b(?:arrives|est(?:imated)?\.? delivery|get it by)\b/i;
-const DETAILS_SETTLE_MS = 3_000;
-const quoteOf = (text: string) => `${SHIPPING_QUOTED.test(text) ? 'quoted' : ''}|${parseTotal(text)?.amount ?? ''}`;
+const DETAILS_SETTLE_MS = 5_000;
 const THIN_PAGE = 2_500;
 const EMPTY_FLAGS: PageFlags = {
   url: '',
@@ -183,7 +182,6 @@ export class Evidence {
   private pageTotal: EvidenceResult['page_total'] = null;
   private readonly checkoutTotals = new Set<number>();
   private readonly checkoutUrls = new Set<string>();
-  quoteBeforeDetails: string | null = null;
 
   constructor(config: EvidenceConfig, onLatch: (latch: StageLatch, pageId: number | null) => void = () => {}) {
     this.config = config;
@@ -215,7 +213,6 @@ export class Evidence {
     if (kind === 'checkout') this.checkoutUrls.add(pageUrl);
     if (kind === 'checkout' || matchesAny(patterns.cart, url)) this.details.observeFields(visible, now);
     const detailsAt = this.details.completeAt;
-    if (kind === 'checkout' && (detailsAt === null || detailsAt === now)) this.quoteBeforeDetails = quoteOf(snapshot.text);
     const inFlow = onSite || this.latched.has('cart');
     const thin = snapshot.text.length < THIN_PAGE;
     const flags: PageFlags = {
@@ -388,8 +385,7 @@ const STAGE_RULES: Record<Stage, (evidence: Evidence, facts: Facts | null) => st
     if (evidence.paymentSeenAt !== null && evidence.paymentSeenAt > completeAt) return 'details matched and the site moved on to payment';
     const onePage = evidence.paymentSeenAt !== null || PAYMENT_HEADING.test(pageText) || ORDER_BUTTON.test(pageText);
     const settled = facts.now - completeAt >= DETAILS_SETTLE_MS;
-    const requoted = SHIPPING_QUOTED.test(pageText) && quoteOf(pageText) !== evidence.quoteBeforeDetails;
-    return onePage && settled && requoted ? 'details matched and the single-page checkout quoted shipping again for them' : null;
+    return onePage && settled && SHIPPING_QUOTED.test(pageText) ? 'details matched and the single-page checkout quotes shipping for them' : null;
   },
 
   payment(evidence, facts) {
