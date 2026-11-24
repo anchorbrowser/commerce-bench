@@ -9,7 +9,12 @@
 
 <a href="LICENSE"><img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-1a7f37"></a>
 <img alt="Node 22.18 or newer" src="https://img.shields.io/badge/node-%E2%89%A5%2022.18-1a7f37">
-<img alt="Runs stop before payment" src="https://img.shields.io/badge/payment-never%20entered-cf222e">
+<a href="https://anchorbrowser.io"><img alt="Built by Anchor Browser" src="https://img.shields.io/badge/built%20by-Anchor%20Browser-0969da"></a>
+<img alt="30 real stores" src="https://img.shields.io/badge/stores-30%20real%20sites-0969da">
+<img alt="Works with any agent over CDP, HTTP or a command" src="https://img.shields.io/badge/agents-CDP%20%C2%B7%20HTTP%20%C2%B7%20CLI-0969da">
+<img alt="Runs on a local or cloud browser" src="https://img.shields.io/badge/browser-local%20or%20cloud-0969da">
+<img alt="Grader proven by 15 selftest checks" src="https://img.shields.io/badge/grader-15%20selftest%20checks-1a7f37">
+<img alt="Safe to run: no order is ever placed" src="https://img.shields.io/badge/safe%20to%20run-no%20orders%20placed-1a7f37">
 
 <br><br>
 
