@@ -47,6 +47,7 @@ export type EvidenceResult = {
   cart: { product_seen: boolean; variant_seen: boolean | null; add_request: string | null };
   details_matched: { email: boolean; address_line: boolean; postal_code: boolean };
   page_total: (Money & { seen_on: 'cart' | 'checkout' }) | null;
+  checkout_totals?: number[];
   payment_frames: string[];
 };
 
@@ -67,6 +68,12 @@ const CONTACT_FIELD = /e-?mail|postal|postcode|zip|address|street/i;
 const SHIPPING_CHOICE = /ship|deliver/i;
 const PAYMENT_HEADING = /payment (?:method|details|information|options)|credit (?:or debit |& prepaid )?cards?/i;
 const PAYMENT_STEP_URL = /\/(?:payment|billing)(?:[/?#.]|$)/i;
+const PAYMENT_QUESTION = /how (?:do|would) you (?:want|like) to pay/i;
+const ORDER_BUTTON = /place (?:your |my )?order|pay now|complete (?:order|purchase)/i;
+const SHIPPING_QUOTED =
+  /\b(?:shipping|delivery)(?: method| cost)?:?(?: (?:standard|ground|economy|express))? (?:free\b|[$£€] ?\d)|\b(?:arrives|est(?:imated)?\.? delivery|get it by)\b/i;
+const DETAILS_SETTLE_MS = 3_000;
+const quoteOf = (text: string) => `${SHIPPING_QUOTED.test(text) ? 'quoted' : ''}|${parseTotal(text)?.amount ?? ''}`;
 const THIN_PAGE = 2_500;
 const EMPTY_FLAGS: PageFlags = {
   url: '',
@@ -156,6 +163,7 @@ type Facts = {
   visible: RawField[];
   addressInForm: boolean;
   flags: PageFlags;
+  now: number;
 };
 
 export class Evidence {
@@ -173,6 +181,9 @@ export class Evidence {
   private readonly pages = new Map<number, { url: string; flags: PageFlags; changedAt: number }>();
   private readonly onLatch: (latch: StageLatch, pageId: number | null) => void;
   private pageTotal: EvidenceResult['page_total'] = null;
+  private readonly checkoutTotals = new Set<number>();
+  private readonly checkoutUrls = new Set<string>();
+  quoteBeforeDetails: string | null = null;
 
   constructor(config: EvidenceConfig, onLatch: (latch: StageLatch, pageId: number | null) => void = () => {}) {
     this.config = config;
@@ -197,12 +208,18 @@ export class Evidence {
     const visible = snapshot.frameFields.flatMap((frame) => frame.fields).filter((field) => !field.hidden);
     const typed = this.details.matchFields(visible);
     const typedHere = Object.values(typed).filter(Boolean).length;
-    const kind = classifyPage(url, snapshot.text, patterns, onSite ? typedHere : 0);
+    const pageUrl = withoutQuery(url);
+    const seenAs = classifyPage(url, snapshot.text, patterns, onSite ? typedHere : 0);
+    const stillCheckout = seenAs === 'cart' && this.checkoutUrls.has(pageUrl) && this.details.completeAt !== null && !EMPTY_CART.test(snapshot.text);
+    const kind = stillCheckout ? 'checkout' : seenAs;
+    if (kind === 'checkout') this.checkoutUrls.add(pageUrl);
     if (kind === 'checkout' || matchesAny(patterns.cart, url)) this.details.observeFields(visible, now);
+    const detailsAt = this.details.completeAt;
+    if (kind === 'checkout' && (detailsAt === null || detailsAt === now)) this.quoteBeforeDetails = quoteOf(snapshot.text);
     const inFlow = onSite || this.latched.has('cart');
     const thin = snapshot.text.length < THIN_PAGE;
     const flags: PageFlags = {
-      url: withoutQuery(url),
+      url: pageUrl,
       block: detectBlock(snapshot),
       login: kind === 'login' && inFlow,
       empty_cart: kind === 'cart' && EMPTY_CART.test(snapshot.text),
@@ -225,12 +242,13 @@ export class Evidence {
     if (kind === 'cart' || kind === 'checkout') {
       const total = parseTotal(snapshot.text);
       if (total && (kind === 'checkout' || this.pageTotal?.seen_on !== 'checkout')) this.pageTotal = { ...total, seen_on: kind };
+      if (total && kind === 'checkout' && detailsAt !== null && detailsAt < now) this.checkoutTotals.add(total.amount);
     }
     if (kind === 'checkout' && inFlow) {
       this.observePayment(snapshot, now);
       this.observeOrderPlaced(flags.url, snapshot.text);
     }
-    this.applyRules({ pageId, url: flags.url, kind, inFlow, snapshot, visible, addressInForm: typed.addressLine, flags });
+    this.applyRules({ pageId, url: flags.url, kind, inFlow, snapshot, visible, addressInForm: typed.addressLine, flags, now });
   }
 
   observeRequest(request: ObservedRequest, now = Date.now()): string | null {
@@ -281,6 +299,7 @@ export class Evidence {
       cart: { product_seen: this.cartListing !== null, variant_seen: this.variantSeen, add_request: this.addRequest },
       details_matched: { email: this.details.email, address_line: this.details.addressLine, postal_code: this.details.postalCode },
       page_total: this.pageTotal,
+      checkout_totals: [...this.checkoutTotals],
       payment_frames: [...this.paymentFrames],
     };
   }
@@ -291,7 +310,7 @@ export class Evidence {
   }
 
   private observePayment(snapshot: PageSnapshot, now: number) {
-    if (PAYMENT_STEP_URL.test(snapshot.url)) this.paymentSeenAt ??= now;
+    if (PAYMENT_STEP_URL.test(snapshot.url) || PAYMENT_QUESTION.test(snapshot.text)) this.paymentSeenAt ??= now;
     for (const frame of snapshot.frameFields) {
       const provider = frame.isMain ? null : matchProviderByFrameUrl(frame.url, this.config.patterns.payment_frame);
       const numberFields = frame.fields.filter((field) => !field.hidden && classifyCardField(field.descriptor) === 'number');
@@ -366,8 +385,11 @@ const STAGE_RULES: Record<Stage, (evidence: Evidence, facts: Facts | null) => st
     if (!facts.addressInForm && postalShown && (addressShown || PAYMENT_HEADING.test(pageText))) {
       return 'details matched and the site shows the address as accepted';
     }
-    const movedOn = evidence.paymentSeenAt !== null && evidence.paymentSeenAt > completeAt;
-    return movedOn ? 'details matched and the site moved on to payment' : null;
+    if (evidence.paymentSeenAt !== null && evidence.paymentSeenAt > completeAt) return 'details matched and the site moved on to payment';
+    const onePage = evidence.paymentSeenAt !== null || PAYMENT_HEADING.test(pageText) || ORDER_BUTTON.test(pageText);
+    const settled = facts.now - completeAt >= DETAILS_SETTLE_MS;
+    const requoted = SHIPPING_QUOTED.test(pageText) && quoteOf(pageText) !== evidence.quoteBeforeDetails;
+    return onePage && settled && requoted ? 'details matched and the single-page checkout quoted shipping again for them' : null;
   },
 
   payment(evidence, facts) {

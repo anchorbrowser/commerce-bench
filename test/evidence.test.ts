@@ -99,6 +99,44 @@ test('payment is not reached until shipping is, and typed card digits are a guar
   );
 });
 
+test('a payment question after the details counts as moving on to payment', () => {
+  const evidence = new Evidence(config);
+  evidence.observePage(1, snapshot('/checkout', { fields: contactFields }), 1_000);
+  assert.deepEqual(stages(evidence), ['checkout']);
+  evidence.observePage(1, snapshot('/checkout', { text: 'Checkout How do you want to pay? Credit or Debit Card' }), 5_000);
+  assert.deepEqual(stages(evidence), ['checkout', 'shipping', 'payment']);
+});
+
+test('a single-page checkout counts as shipping once the quote changes after the details settle', () => {
+  const page = (text: string) => snapshot('/checkout', { text, fields: contactFields });
+  const quoted = 'Shipping $7.50 Order total $19.50 Place order';
+  const evidence = new Evidence(config);
+  evidence.observePage(1, page(quoted), 1_000);
+  assert.deepEqual(stages(evidence), ['checkout']);
+  evidence.observePage(1, page('Free shipping over $35 Order total $19.50 Place order'), 9_000);
+  assert.deepEqual(stages(evidence), ['checkout']);
+  evidence.observePage(1, page('Shipping $7.50 Order total $19.50 Continue to delivery'), 9_000);
+  assert.deepEqual(stages(evidence), ['checkout']);
+  evidence.observePage(1, page(`We could not verify your address ${quoted}`), 9_000);
+  assert.deepEqual(stages(evidence), ['checkout']);
+  evidence.observePage(1, page(quoted), 9_000);
+  assert.deepEqual(stages(evidence), ['checkout']);
+  evidence.observePage(1, page('Shipping $7.50 Estimated tax $1.07 Order total $20.57 Place order'), 9_500);
+  assert.deepEqual(stages(evidence), ['checkout', 'shipping']);
+});
+
+test('a checkout that lives on the cart address stays a checkout after the store accepts the details', () => {
+  const evidence = new Evidence(config);
+  evidence.observePage(1, snapshot('/cart', { text: 'Trail Mug Total $26.94 Place order', fields: contactFields }), 1_000);
+  assert.equal(evidence.result().furthest_stage, 'checkout');
+  assert.deepEqual(evidence.result().checkout_totals, []);
+  const accepted = `Trail Mug Shipping to ${EXPECTED.addressLine} ${EXPECTED.postalCode} Shipping $12.95 Total $29.33 Payment method Place order`;
+  evidence.observePage(1, snapshot('/cart', { text: accepted }), 6_000);
+  assert.equal(evidence.result().furthest_stage, 'shipping');
+  assert.deepEqual(evidence.result().page_total, { amount: 29.33, currency: 'USD', seen_on: 'checkout' });
+  assert.deepEqual(evidence.result().checkout_totals, [29.33]);
+});
+
 test('order and tokenize requests are blocked; reads are not', () => {
   const evidence = new Evidence(config);
   assert.equal(evidence.shouldBlock({ url: `${SHOP}/checkout/place-order`, method: 'GET', body: null }), false);
@@ -127,9 +165,12 @@ test('a routed card request is recorded once, as blocked; an unrouted card paylo
 
 test('going back to a filled cart after checkout keeps it a cart and keeps the checkout total', () => {
   const evidence = new Evidence(config);
-  evidence.observePage(1, snapshot('/checkout', { text: 'Order total $32.99', fields: [...contactFields, ...deliveryChoices] }));
-  evidence.observePage(1, snapshot('/cart', { text: 'Trail Mug x1 Total $28.00' }));
+  const checkout = snapshot('/checkout', { text: 'Order total $32.99', fields: [...contactFields, ...deliveryChoices] });
+  evidence.observePage(1, checkout, 1_000);
+  evidence.observePage(1, checkout, 1_500);
+  evidence.observePage(1, snapshot('/cart', { text: 'Trail Mug x1 Total $28.00' }), 2_000);
   assert.deepEqual(evidence.result().page_total, { amount: 32.99, currency: 'USD', seen_on: 'checkout' });
+  assert.deepEqual(evidence.result().checkout_totals, [32.99]);
   assert.equal(evidence.result().page.url, `${SHOP}/cart`);
 });
 

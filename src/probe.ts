@@ -13,6 +13,8 @@ export type ProbeConfig = EvidenceConfig & { cdpUrl: string; outputDir: string; 
 
 const BODY_LIMIT = 4_000;
 const SNAPSHOT_TIMEOUT_MS = 10_000;
+const STOP_TIMEOUT_MS = 45_000;
+export const BROWSER_UNRESPONSIVE = 'the browser stopped answering before the run ended';
 const isWebPage = (page: Page) => !page.isClosed() && /^https?:/i.test(page.url());
 
 function describeRequest(request: Request): ObservedRequest {
@@ -60,14 +62,19 @@ export class Probe {
     this.stopped = true;
     if (this.timer) clearTimeout(this.timer);
     this.wake?.();
+    const finished = await Promise.race([this.shutDown().then(() => true), sleep(STOP_TIMEOUT_MS).then(() => false)]);
+    if (!finished) this.warn(BROWSER_UNRESPONSIVE);
+    return this.result();
+  }
+
+  private async shutDown() {
     await this.loopDone;
     await this.enqueue(() => this.sweep());
     while (this.pending.size > 0) await Promise.allSettled([...this.pending]);
     for (const context of this.contexts) {
       await context.unrouteAll({ behavior: 'ignoreErrors' }).catch(() => undefined);
     }
-    await Promise.race([this.browser.close().catch(() => undefined), new Promise((resolve) => setTimeout(resolve, 10_000))]);
-    return this.result();
+    await this.browser.close().catch(() => undefined);
   }
 
   result(): ProbeResult {

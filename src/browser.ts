@@ -62,6 +62,9 @@ async function launchLocal(headed: boolean): Promise<BrowserHandle> {
   throw new Error('Local Chromium did not open a debugging port. Run "npx playwright install chromium" and retry.');
 }
 
+const RATE_LIMIT_TRIES = 8;
+const RATE_LIMIT_WAIT_MS = 20_000;
+
 async function launchAnchor({ domain, anchorConfig, anchorDomain = true }: BrowserOptions): Promise<BrowserHandle> {
   const apiKey = process.env.ANCHORBROWSER_API_KEY;
   if (!apiKey) throw new Error('The anchor backend needs ANCHORBROWSER_API_KEY in the environment.');
@@ -70,8 +73,16 @@ async function launchAnchor({ domain, anchorConfig, anchorDomain = true }: Brows
   const withDomain = useDomain ? { ...config, session: { ...config.session, domain } } : config;
   const headers = { 'anchor-api-key': apiKey, 'content-type': 'application/json' };
   const create = (body: unknown) => fetch(`${ANCHOR_API}/v1/sessions`, { method: 'POST', headers, body: JSON.stringify(body) });
-  let response = await create(withDomain);
-  if (response.status === 400 && useDomain) response = await create(config);
+  const createWithRetry = async (body: unknown) => {
+    let answer = await create(body);
+    for (let tries = 1; answer.status === 429 && tries < RATE_LIMIT_TRIES; tries++) {
+      await sleep(RATE_LIMIT_WAIT_MS);
+      answer = await create(body);
+    }
+    return answer;
+  };
+  let response = await createWithRetry(withDomain);
+  if (response.status === 400 && useDomain) response = await createWithRetry(config);
   if (!response.ok) throw new Error(`Anchor session creation failed with HTTP ${response.status}`);
   const payload = (await response.json()) as { data?: { id?: string; cdp_url?: string } };
   const id = payload.data?.id;

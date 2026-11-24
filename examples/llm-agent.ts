@@ -15,6 +15,11 @@ type Task = {
 
 const MODEL = process.env.COMMERCE_BENCH_MODEL ?? 'claude-opus-5-5';
 const MAX_STEPS = Number(process.env.COMMERCE_BENCH_MAX_STEPS ?? 45);
+const MODEL_TIMEOUT_MS = 180_000;
+const ACTION_TIMEOUT_MS = 90_000;
+const STALLED = Symbol('stalled');
+const within = <T>(work: Promise<T>, ms: number) =>
+  Promise.race([work, new Promise<typeof STALLED>((resolve) => setTimeout(() => resolve(STALLED), ms))]);
 const PRICE_PER_MTOK: Record<string, { input: number; output: number; cacheRead: number }> = {
   'claude-opus-5-5': { input: 4, output: 20, cacheRead: 0.2 },
   'claude-sonnet-5-5': { input: 2, output: 10, cacheRead: 0.1 },
@@ -144,7 +149,7 @@ const emit = (result: Record<string, unknown>) => {
 };
 if (!task.browser) emit({ status: 'failed', failure: { code: 'stuck_at_start', message: 'This agent needs the harness browser.' } });
 
-const client = new Anthropic();
+const client = new Anthropic({ timeout: MODEL_TIMEOUT_MS });
 const browser = await chromium.connectOverCDP(task.browser!.cdp_url);
 const context = browser.contexts()[0];
 let page = context.pages()[0] ?? (await context.newPage());
@@ -161,7 +166,7 @@ ${JSON.stringify(task.shopper, null, 2)}
 How to work:
 - Each action returns the page as a numbered list of elements plus some page text. Ids change after every action, so use ids from the latest result only.
 - Close cookie banners and popups that cover the page. Use the site search to find the product.
-- If the site shows a human check, a captcha or a block page that does not clear, stop and report it. Do not try to get around it.
+- If the site shows a human check, a captcha or a block page, wait a few seconds and open the page once more. If it is still there, stop and report it. Do not try to get around it.
 - When you stop, call finish. Report the furthest stage you actually reached and the order total the page shows. If you did not reach the goal, say so.`;
 
 const messages: Anthropic.Beta.BetaMessageParam[] = [
@@ -211,9 +216,14 @@ try {
         continue;
       }
       steps += 1;
-      results.push({ type: 'tool_result', tool_use_id: call.id, content: await act(page, call.name, input) });
+      const seen = await within(act(page, call.name, input), ACTION_TIMEOUT_MS);
+      if (seen === STALLED) {
+        final = { status: 'failed', failure: { code: 'browser_unresponsive', message: 'The browser stopped answering.' } };
+        break;
+      }
+      results.push({ type: 'tool_result', tool_use_id: call.id, content: seen });
     }
-    messages.push({ role: 'user', content: results });
+    if (results.length === calls.length) messages.push({ role: 'user', content: results });
   }
 } catch (error) {
   const message =
@@ -225,7 +235,7 @@ try {
   final = { status: 'failed', failure: { code: 'stuck_at_start', message } };
 }
 
-await page.screenshot({ path: path.join(task.evidence_dir, 'agent-final.png') }).catch(() => undefined);
+await within(page.screenshot({ path: path.join(task.evidence_dir, 'agent-final.png') }).catch(() => undefined), 20_000);
 const price = PRICE_PER_MTOK[MODEL];
 emit({
   ...(final ?? { status: 'failed', failure: { code: 'timeout', message: 'Ran out of steps or time before finishing.' } }),
