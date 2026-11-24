@@ -133,9 +133,12 @@ export class DetailsMatcher {
   matchFields(fields: RawField[]): { email: boolean; addressLine: boolean; postalCode: boolean } {
     const values = fields.map((field) => field.value.trim()).filter(Boolean);
     const lower = values.map((value) => value.toLowerCase());
+    const line = this.expected.addressLine.toLowerCase();
+    const [, houseNumber, street] = /^(\d+[a-z]?)\s+(.+)$/.exec(line) ?? [];
+    const splitAcrossFields = Boolean(street) && lower.includes(houseNumber) && lower.some((value) => value.includes(street));
     return {
       email: lower.includes(this.expected.email.toLowerCase()),
-      addressLine: lower.some((value) => value.includes(this.expected.addressLine.toLowerCase())),
+      addressLine: splitAcrossFields || lower.some((value) => value.includes(line)),
       postalCode: values.some((value) => compact(value) === compact(this.expected.postalCode)),
     };
   }

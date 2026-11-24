@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
-import { classifyPage, Evidence, type EvidenceConfig } from '../src/evidence.ts';
+import { classifyPage, DetailsMatcher, Evidence, type EvidenceConfig } from '../src/evidence.ts';
 import { evidenceFiles } from '../src/run.ts';
 import type { PageSnapshot, RawField } from '../src/snapshot.ts';
 import { compilePatterns } from '../src/tasks.ts';
@@ -241,4 +241,12 @@ test('an address picked from a lookup counts once the checkout shows it back', (
   evidence.observePage(1, snapshot('/checkout/payment', { text: chosen }), 5_000);
   assert.deepEqual(evidence.result().details_matched, { email: true, address_line: true, postal_code: true });
   assert.equal(evidence.result().furthest_stage, 'payment');
+});
+
+test('a street address split into house number and street fields still matches', () => {
+  const [, houseNumber, street] = /^(\S+)\s+(.+)$/.exec(EXPECTED.addressLine)!;
+  const matcher = new DetailsMatcher(EXPECTED);
+  assert.equal(matcher.matchFields([field('house', houseNumber), field('address1', street)]).addressLine, true);
+  assert.equal(matcher.matchFields([field('address1', street)]).addressLine, false);
+  assert.equal(matcher.matchFields([field('house', houseNumber), field('address1', 'Another Road')]).addressLine, false);
 });
