@@ -1,9 +1,6 @@
 <div align="center">
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg">
-  <img alt="Commerce Bench: how far does your shopping agent really get?" src="assets/banner-light.svg" width="880">
-</picture>
+<img alt="Commerce Bench, by Anchor. An open-source harness that runs your shopping agent through real store checkouts, grades it from the browser, and never pays." src="assets/banner.png" width="880">
 
 <br>
 
