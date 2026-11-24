@@ -140,6 +140,11 @@ export class DetailsMatcher {
     };
   }
 
+  observeShown(text: string, now: number) {
+    const shown = text.toLowerCase().includes(this.expected.addressLine.toLowerCase()) && compact(text).includes(compact(this.expected.postalCode));
+    if (shown) this.mark(false, true, true, now);
+  }
+
   observeFields(fields: RawField[], now: number) {
     const found = this.matchFields(fields);
     this.mark(found.email, found.addressLine, found.postalCode, now);
@@ -212,6 +217,7 @@ export class Evidence {
     const kind = stillCheckout ? 'checkout' : seenAs;
     if (kind === 'checkout') this.checkoutUrls.add(pageUrl);
     if (kind === 'checkout' || matchesAny(patterns.cart, url)) this.details.observeFields(visible, now);
+    if (kind === 'checkout' && (onSite || this.latched.has('cart'))) this.details.observeShown(snapshot.text, now);
     const detailsAt = this.details.completeAt;
     const inFlow = onSite || this.latched.has('cart');
     const thin = snapshot.text.length < THIN_PAGE;

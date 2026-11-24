@@ -5,16 +5,13 @@
   "category": "marketplace",
   "start_url": "https://www.target.com/",
   "product": {
-    "name": "Sharpie Permanent Markers, Fine Tip, Black",
-    "variant": "2 count",
+    "name": "LEGO Icons Orchid Plant and Flowers Set 10311",
     "quantity": 1,
     "match": [
-      "sharpie",
-      "permanent"
+      "lego",
+      "orchid"
     ],
-    "variant_match": [
-      "black"
-    ]
+    "variant_match": []
   },
   "stop_at": "shipping",
   "status": "draft"

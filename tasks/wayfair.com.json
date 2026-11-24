@@ -5,16 +5,13 @@
   "category": "home",
   "start_url": "https://www.wayfair.com/",
   "product": {
-    "name": "Wayfair Basics 1800 Series Sheet Set",
-    "variant": "Queen, White",
+    "name": "Wayfair Basics 13 Gallon Plastic Motion Sensor Trash Can",
     "quantity": 1,
     "match": [
       "wayfair basics",
-      "sheet"
+      "trash can"
     ],
-    "variant_match": [
-      "queen"
-    ]
+    "variant_match": []
   },
   "stop_at": "shipping",
   "status": "draft"

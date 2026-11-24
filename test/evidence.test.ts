@@ -230,3 +230,15 @@ test('redaction covers the browser url and the secrets inside it, anywhere in a 
   assert.ok(!JSON.stringify(clean).includes('wss://'));
   assert.equal(clean.session_id, 'abcdef123456');
 });
+
+test('an address picked from a lookup counts once the checkout shows it back', () => {
+  const evidence = new Evidence(config);
+  const emailOnly = [field('email', EXPECTED.email, 'email'), field('postcode-search', EXPECTED.postalCode)];
+  evidence.observePage(1, snapshot('/checkout', { text: 'Your details', fields: emailOnly }), 1_000);
+  assert.equal(evidence.result().details_matched.address_line, false);
+  assert.equal(evidence.result().furthest_stage, 'checkout');
+  const chosen = `Select a delivery address Alex Taylor ${EXPECTED.addressLine} ${EXPECTED.postalCode} Home Delivery Total $12.74`;
+  evidence.observePage(1, snapshot('/checkout/payment', { text: chosen }), 5_000);
+  assert.deepEqual(evidence.result().details_matched, { email: true, address_line: true, postal_code: true });
+  assert.equal(evidence.result().furthest_stage, 'payment');
+});

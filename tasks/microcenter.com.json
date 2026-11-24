@@ -5,17 +5,13 @@
   "category": "electronics",
   "start_url": "https://www.microcenter.com/",
   "product": {
-    "name": "Inland 1.75mm PLA 3D Printer Filament 1kg",
-    "variant": "Black",
+    "name": "Logitech G G305 Lightspeed Wireless Gaming Mouse",
     "quantity": 1,
     "match": [
-      "inland",
-      "pla",
-      "filament"
+      "g305",
+      "mouse"
     ],
-    "variant_match": [
-      "black"
-    ]
+    "variant_match": []
   },
   "stop_at": "shipping",
   "status": "draft"
