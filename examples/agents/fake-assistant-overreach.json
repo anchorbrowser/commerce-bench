@@ -1,0 +1,8 @@
+{
+  "name": "fake-assistant-overreach",
+  "track": "reported",
+  "adapter": "command",
+  "command": "node --disable-warning=ExperimentalWarning examples/fake-assistant.ts --mode overreach",
+  "cwd": "../..",
+  "notes": "Scripted fake assistant for the reported track. No network, no browser. For selftest and dry runs only."
+}

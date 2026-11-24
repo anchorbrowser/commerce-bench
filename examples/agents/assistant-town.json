@@ -1,0 +1,10 @@
+{
+  "name": "town",
+  "track": "reported",
+  "adapter": "command",
+  "command": "python3 examples/assistant-bridge.py --assistant town --channel browser --to env:ABENCH_TOWN_URL",
+  "cwd": "../..",
+  "notes": "Needs ABENCH_DIR, Python playwright, a Town account logged in once into the shared browser profile and ABENCH_TOWN_URL set to its chat page.",
+  "status": "needs_account",
+  "status_note": "Needs a Town account logged in once into the browser profile, and ABENCH_TOWN_URL set to its chat page. Neither is set up here."
+}

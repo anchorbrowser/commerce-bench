@@ -1,0 +1,10 @@
+{
+  "name": "hermes",
+  "track": "reported",
+  "adapter": "command",
+  "command": "python3 examples/assistant-bridge.py --assistant hermes --channel hermes",
+  "cwd": "../..",
+  "notes": "Needs ABENCH_DIR and the hermes CLI on PATH (or ABENCH_HERMES_BIN, or ABENCH_HERMES_URL for its API server) with a model key set up in Hermes.",
+  "status": "needs_account",
+  "status_note": "The hermes CLI is installed here, but its model key and browser state live in its own config, which was not checked. It runs with no approval prompts, so confirm it has no saved payment method before a run."
+}

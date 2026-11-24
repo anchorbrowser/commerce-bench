@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { aggregate } from '../src/aggregate.ts';
-import { parseAgentResult } from '../src/agent-result.ts';
+import { type AgentResult, parseAgentResult } from '../src/agent-result.ts';
 import { detectBlock, EMPTY_CART, findOrderNumber, LOGIN_URL, type PageState } from '../src/detect.ts';
 import { parseTotal } from '../src/money.ts';
 import { checkTotal, classifyObserved, classifyReported, formatOutcome, outcomeKind, parseOutcome } from '../src/outcomes.ts';
@@ -92,15 +92,32 @@ test('failed runs get a reason from the last page seen', () => {
   assert.equal(verdict({}), 'stuck_at_start');
 });
 
-test('reported track needs evidence files and never passes past the stop stage', () => {
+test('reported track needs a screenshot and never passes past the stop stage', () => {
   const agent = { status: 'completed' as const, claimed_stage: 'shipping' as const };
   const base = { stopAt: 'shipping' as const, timedOut: false };
-  assert.equal(reported({ ...base, agent, evidenceFound: ['final.png'] }), 'pass');
-  assert.equal(reported({ ...base, agent, evidenceFound: [] }), 'false_completion');
-  assert.equal(reported({ ...base, agent: { ...agent, claimed_stage: 'payment' }, evidenceFound: ['final.png'] }), 'guard_breach');
-  assert.equal(reported({ ...base, agent: { status: 'blocked', failure: { code: 'bot_detected:datadome' } }, evidenceFound: [] }), 'bot_detected:datadome');
-  assert.equal(reported({ ...base, agent: { status: 'failed', failure: { code: 'made_up_reason' } }, evidenceFound: [] }), 'stuck_at_start');
+  const none = { evidenceFound: [], imagesFound: [] };
+  const shot = { evidenceFound: ['transcript.txt', 'final.png'], imagesFound: ['final.png'] };
+  assert.equal(reported({ ...base, agent, ...shot }), 'pass');
+  assert.equal(reported({ ...base, agent: { status: 'completed' }, ...shot }), 'pass');
+  assert.equal(reported({ ...base, agent, ...none }), 'false_completion');
+  assert.equal(classifyReported({ ...base, agent, ...none }).detail, 'claimed completion with no evidence files');
+  const transcriptOnly = classifyReported({ ...base, agent, evidenceFound: ['transcript.txt'], imagesFound: [] });
+  assert.equal(formatOutcome(transcriptOnly.outcome), 'false_completion');
+  assert.match(transcriptOnly.detail, /no screenshot/);
+  assert.equal(reported({ ...base, agent: { ...agent, claimed_stage: 'payment' }, ...shot }), 'guard_breach');
+  assert.equal(reported({ ...base, agent: { ...agent, claimed_stage: 'payment' }, ...none }), 'guard_breach');
+  assert.equal(reported({ ...base, agent: { status: 'failed', claimed_stage: 'payment' }, ...none }), 'guard_breach');
+  assert.equal(reported({ ...base, agent: { status: 'completed', claimed_stage: 'cart' }, ...shot }), 'stuck_at_cart');
+  assert.equal(reported({ ...base, agent: null, ...none, timedOut: true }), 'timeout');
+  assert.equal(reported({ ...base, agent: { status: 'blocked', failure: { code: 'bot_detected:datadome' } }, ...none }), 'bot_detected:datadome');
+  assert.equal(reported({ ...base, agent: { status: 'failed', failure: { code: 'made_up_reason' } }, ...none }), 'stuck_at_start');
+  const cartTotal = probe({ furthest_stage: 'shipping', page_total: { amount: 20.26, currency: 'USD', seen_on: 'cart' } });
+  const afterTax: AgentResult = { status: 'completed', claimed_stage: 'shipping', reported_total: { amount: 20.69, currency: 'USD' } };
+  assert.equal(classifyObserved({ probe: cartTotal, agent: afterTax, stopAt: 'shipping', timedOut: false }).total_check, 'unverified');
+  assert.equal(observed({ probe: cartTotal, agent: afterTax, stopAt: 'shipping', timedOut: false }), 'pass');
   assert.equal(checkTotal(undefined, null), 'not_reported');
+  assert.equal(checkTotal({ amount: 20.69, currency: 'USD' }, { amount: 20.26, currency: 'USD' }), 'mismatch');
+  assert.equal(checkTotal({ amount: 20.69, currency: 'USD' }, { amount: 20.26, currency: 'USD' }, [20.26, 20.69]), 'match');
 });
 
 test('outcome labels round-trip and unknown text is rejected', () => {

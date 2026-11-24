@@ -1,0 +1,10 @@
+{
+  "name": "openclaw",
+  "track": "reported",
+  "adapter": "command",
+  "command": "python3 examples/assistant-bridge.py --assistant openclaw --channel openclaw",
+  "cwd": "../..",
+  "notes": "Needs ABENCH_DIR, the openclaw CLI or npx, and ANTHROPIC_API_KEY or OPENAI_API_KEY in the environment.",
+  "status": "needs_account",
+  "status_note": "Needs ANTHROPIC_API_KEY or OPENAI_API_KEY in the environment; neither is set. The openclaw CLI is installed here. Check which Chrome profile it drives for saved cards before a run."
+}

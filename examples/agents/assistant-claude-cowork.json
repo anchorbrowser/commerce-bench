@@ -1,0 +1,10 @@
+{
+  "name": "claude-cowork",
+  "track": "reported",
+  "adapter": "command",
+  "command": "python3 examples/assistant-bridge.py --assistant claude-cowork --channel browser --to env:ABENCH_CLAUDE_COWORK_URL",
+  "cwd": "../..",
+  "notes": "Needs ABENCH_DIR, Python playwright, a logged-in browser profile and ABENCH_CLAUDE_COWORK_URL set to a Claude Cowork chat page.",
+  "status": "not_run",
+  "status_note": "The external driver only reaches Claude Cowork through its API mode, which fetches pages inside its own test site and cannot shop a real store. The browser channel command here has not been tried, and no chat URL or logged-in profile is set up."
+}

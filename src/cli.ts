@@ -2,10 +2,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import { loadAgent } from './agents.ts';
+import { loadAgent, NOT_RUN_REASON } from './agents.ts';
 import type { BrowserBackend } from './browser.ts';
 import { writeReport } from './report.ts';
-import { runAll } from './run.ts';
+import { NOT_RUN_FILE, recordNotRun, runAll } from './run.ts';
 import { selftest } from './selftest.ts';
 import { loadTasks } from './tasks.ts';
 import { describeError } from './util.ts';
@@ -103,6 +103,15 @@ async function main() {
     const wanted = values.site?.split(',').map((id) => id.trim());
     const tasks = loadTasks(values.tasks ?? path.join(ROOT, 'tasks')).filter((task) => !wanted || wanted.includes(task.id));
     if (tasks.length === 0) fail('No task files matched.');
+    const outDir = path.resolve(values.out ?? path.join(ROOT, 'results', agent.name));
+    if (agent.status) {
+      const entry = recordNotRun(outDir, agent, tasks.length);
+      const note = entry.note ? ` (${entry.note})` : '';
+      console.log(`Skipped ${agent.name} (${agent.track}): ${NOT_RUN_REASON[entry.status]}${note}. Nothing ran. Noted in ${path.join(outDir, NOT_RUN_FILE)}`);
+      const report = writeReport([outDir], outDir);
+      console.log(`\nWrote ${report.leaderboard}\nWrote ${report.html}`);
+      return;
+    }
     const runs = Number(values.runs ?? 3);
     if (!Number.isInteger(runs) || runs < 1) fail('--runs must be a positive integer');
     const backend = (values.browser ?? 'local') as BrowserBackend;
@@ -110,7 +119,6 @@ async function main() {
     if (backend === 'cdp' && runs * tasks.length > 1) {
       console.log('Note: every run reuses the one browser behind --cdp-url. Clear its state between runs yourself.');
     }
-    const outDir = path.resolve(values.out ?? path.join(ROOT, 'results', agent.name));
     console.log(`${agent.name} (${agent.track}) on ${tasks.length} sites, ${runs} runs each. Results in ${outDir}`);
     await runAll({
       root: ROOT,

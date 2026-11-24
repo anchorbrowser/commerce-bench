@@ -1,0 +1,10 @@
+{
+  "name": "instinct",
+  "track": "reported",
+  "adapter": "command",
+  "command": "python3 examples/assistant-bridge.py --assistant instinct --channel imessage --to env:ABENCH_IMESSAGE_TO",
+  "cwd": "../..",
+  "notes": "Needs ABENCH_DIR, macOS Messages signed in with an open Instinct thread, ABENCH_IMESSAGE_TO and Accessibility permission for the terminal.",
+  "status": "waitlist",
+  "status_note": "Instinct access is by waitlist or invite. ABENCH_IMESSAGE_TO is not set and no Instinct thread exists on this machine."
+}

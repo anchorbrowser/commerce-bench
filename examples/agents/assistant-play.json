@@ -1,0 +1,10 @@
+{
+  "name": "play",
+  "track": "reported",
+  "adapter": "command",
+  "command": "python3 examples/assistant-bridge.py --assistant play --channel play --to https://work.play.fast/",
+  "cwd": "../..",
+  "notes": "Needs ABENCH_DIR, Python playwright and a Play account logged in once into the shared browser profile.",
+  "status": "needs_account",
+  "status_note": "Needs a Play account logged in once with: python3 \"$ABENCH_DIR/runner/channels.py\" login https://work.play.fast/. Python playwright is not installed here and no logged-in profile exists."
+}

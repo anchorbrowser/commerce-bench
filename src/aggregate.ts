@@ -1,5 +1,6 @@
 import { botVendor } from './outcomes.ts';
-import { type RunRecord, runKey } from './run.ts';
+import type { NotRunStatus } from './agents.ts';
+import { type NotRunRecord, type RunRecord, runKey } from './run.ts';
 import { type Stage, STAGES, stageRank } from './stages.ts';
 import { median, nowIso } from './util.ts';
 
@@ -29,12 +30,15 @@ export type AgentSummary = {
   total_cost_usd: number | null;
 };
 
+export type NotRunEntry = { agent: string; track: 'observed' | 'reported'; status: NotRunStatus; note: string | null; sites: number };
+
 export type Leaderboard = {
   schema_version: '0.1';
   generated_at: string;
   stages: readonly Stage[];
   agents: AgentSummary[];
   sites: { task_id: string; site: string; category: string | null; stop_at: Stage; cells: Record<string, SiteCell> }[];
+  not_run?: NotRunEntry[];
 };
 
 const cellKey = (agent: string, taskId: string) => `${agent}|${taskId}`;
@@ -56,7 +60,14 @@ export function dedupe(records: RunRecord[]): RunRecord[] {
   return [...new Map(records.map((record) => [runKey(record), record])).values()];
 }
 
-export function aggregate(records: RunRecord[]): Leaderboard {
+export function notRunEntries(lines: NotRunRecord[], ran: Set<string>): NotRunEntry[] {
+  const latest = new Map(lines.filter((line) => !ran.has(line.agent)).map((line) => [line.agent, line]));
+  return [...latest.values()]
+    .map(({ agent, track, status, note, sites }) => ({ agent, track, status, note: note ?? null, sites }))
+    .sort((a, b) => a.agent.localeCompare(b.agent));
+}
+
+export function aggregate(records: RunRecord[], notRunLines: NotRunRecord[] = []): Leaderboard {
   const agentNames = [...new Set(records.map((record) => record.agent))];
   const taskIds = [...new Set(records.map((record) => record.task_id))].sort();
   const cells = new Map<string, SiteCell>();
@@ -113,6 +124,7 @@ export function aggregate(records: RunRecord[]): Leaderboard {
     (a, b) => b.sites_passed - a.sites_passed || a.false_completion_rate - b.false_completion_rate || a.agent.localeCompare(b.agent)
   );
 
+  const notRun = notRunEntries(notRunLines, new Set(agentNames));
   return {
     schema_version: '0.1',
     generated_at: nowIso(),
@@ -127,5 +139,6 @@ export function aggregate(records: RunRecord[]): Leaderboard {
       }
       return { task_id: taskId, site: sample.site, category: sample.category, stop_at: sample.stop_at, cells: row };
     }),
+    ...(notRun.length > 0 ? { not_run: notRun } : {}),
   };
 }

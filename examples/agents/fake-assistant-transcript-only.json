@@ -1,0 +1,8 @@
+{
+  "name": "fake-assistant-transcript-only",
+  "track": "reported",
+  "adapter": "command",
+  "command": "node --disable-warning=ExperimentalWarning examples/fake-assistant.ts --mode transcript-only",
+  "cwd": "../..",
+  "notes": "Scripted fake assistant for the reported track. No network, no browser. For selftest and dry runs only."
+}

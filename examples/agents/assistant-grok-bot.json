@@ -1,0 +1,10 @@
+{
+  "name": "grok-bot",
+  "track": "reported",
+  "adapter": "command",
+  "command": "python3 examples/assistant-bridge.py --assistant grok-bot --channel browser --to https://grok.com",
+  "cwd": "../..",
+  "notes": "Needs ABENCH_DIR, Python playwright and a Grok account logged in once into the shared browser profile.",
+  "status": "needs_account",
+  "status_note": "Needs a Grok account logged in once with: python3 \"$ABENCH_DIR/runner/channels.py\" login https://grok.com. Python playwright is not installed here and no logged-in profile exists. The cursor channel is not used because it waits on traffic to the driver's own test site."
+}

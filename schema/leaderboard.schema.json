@@ -271,6 +271,47 @@
           }
         }
       }
+    },
+    "not_run": {
+      "type": "array",
+      "description": "Agents that were listed but not run, for example because they need an account. They are not in agents and have no rates.",
+      "items": {
+        "type": "object",
+        "required": [
+          "agent",
+          "track",
+          "status",
+          "note",
+          "sites"
+        ],
+        "properties": {
+          "agent": {
+            "type": "string"
+          },
+          "track": {
+            "enum": [
+              "observed",
+              "reported"
+            ]
+          },
+          "status": {
+            "enum": [
+              "needs_account",
+              "waitlist",
+              "not_run"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sites": {
+            "type": "integer"
+          }
+        }
+      }
     }
   }
 }

@@ -7,6 +7,16 @@ import { isStage, STAGES } from './stages.ts';
 import type { AgentTask } from './tasks.ts';
 import { describeError, readJson, redact, secretsInUrl } from './util.ts';
 
+export const NOT_RUN_STATUSES = ['needs_account', 'waitlist', 'not_run'] as const;
+
+export type NotRunStatus = (typeof NOT_RUN_STATUSES)[number];
+
+export const NOT_RUN_REASON: Record<NotRunStatus, string> = {
+  needs_account: 'needs an account',
+  waitlist: 'on a waitlist',
+  not_run: 'not run',
+};
+
 export type AgentSpec = {
   name: string;
   track: 'observed' | 'reported';
@@ -16,6 +26,8 @@ export type AgentSpec = {
   url?: string;
   headers?: Record<string, string>;
   notes?: string;
+  status?: NotRunStatus;
+  status_note?: string;
 };
 
 export type AgentRun = { result: AgentResult | null; timedOut: boolean; error: string | null };
@@ -32,6 +44,8 @@ export function loadAgent(location: string, root: string): AgentSpec {
   if (spec.adapter === 'command' && !spec.command) problems.push('command adapter needs "command"');
   if (spec.adapter === 'http' && !spec.url) problems.push('http adapter needs "url"');
   if (spec.adapter === 'manual' && spec.track !== 'observed') problems.push('manual adapter is observed only');
+  if (spec.status !== undefined && !NOT_RUN_STATUSES.includes(spec.status)) problems.push(`status must be one of ${NOT_RUN_STATUSES.join(', ')}`);
+  if (spec.status_note !== undefined && typeof spec.status_note !== 'string') problems.push('status_note must be a string');
   if (problems.length > 0) throw new Error(`Invalid agent file ${file}: ${problems.join('; ')}`);
   return { ...spec, cwd: spec.cwd ? path.resolve(path.dirname(file), spec.cwd) : root };
 }

@@ -1,0 +1,10 @@
+{
+  "name": "muse",
+  "track": "reported",
+  "adapter": "command",
+  "command": "python3 examples/assistant-bridge.py --assistant muse --channel browser --to env:ABENCH_MUSE_URL",
+  "cwd": "../..",
+  "notes": "Needs ABENCH_DIR, Python playwright, a Muse account logged in once into the shared browser profile and ABENCH_MUSE_URL set to its chat page.",
+  "status": "needs_account",
+  "status_note": "Needs a Muse account (US only) logged in once into the browser profile, and ABENCH_MUSE_URL set to its chat page. Neither is set up here. Muse declares payment support, so check the account holds no saved card before a run."
+}

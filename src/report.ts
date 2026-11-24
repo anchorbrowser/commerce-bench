@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { NOT_RUN_REASON } from './agents.ts';
 import { aggregate, dedupe, type Leaderboard } from './aggregate.ts';
 import { outcomeKind } from './outcomes.ts';
-import { readResults, type RunRecord } from './run.ts';
+import { readNotRun, readResults, type RunRecord } from './run.ts';
 import { STAGE_LABEL, STAGES, stageRank } from './stages.ts';
 import { escapeHtml as esc } from './util.ts';
 
@@ -107,6 +108,17 @@ function walls(board: Leaderboard): string {
   return `<div class="card"><table><tr><th>Agent</th>${head}</tr>${rows}</table></div>`;
 }
 
+function notRunTable(board: Leaderboard): string {
+  const rows = (board.not_run ?? [])
+    .map(
+      (entry) => `<tr><td><strong>${esc(entry.agent)}</strong></td><td><span class="badge">${esc(entry.track)}</span></td>
+<td>${esc(NOT_RUN_REASON[entry.status] ?? entry.status)}${entry.note ? `<div class="sub">${esc(entry.note)}</div>` : ''}</td><td class="num">${esc(entry.sites)}</td></tr>`
+    )
+    .join('');
+  return `<div class="card"><table><tr><th>Agent</th><th>Track</th><th>Reason</th><th class="num">Sites selected</th></tr>${rows}</table>
+<p class="sub">These agents were not run. They have no results and are not counted in any rate above.</p></div>`;
+}
+
 function runDetails(records: RunRecord[], relativeTo: (record: RunRecord) => string): string {
   return records
     .map((record) => {
@@ -140,7 +152,8 @@ ${record.errors.length ? `<div class="sub">Errors: ${esc(record.errors.join('; '
 export function writeReport(inputDirs: string[], outDir: string): { leaderboard: string; html: string; board: Leaderboard } {
   fs.mkdirSync(outDir, { recursive: true });
   const loaded = inputDirs.flatMap((dir) => readResults(dir).map((record) => ({ record, dir })));
-  if (loaded.length === 0) throw new Error(`No results found in ${inputDirs.join(', ')}`);
+  const notRunLines = inputDirs.flatMap((dir) => readNotRun(dir));
+  if (loaded.length === 0 && notRunLines.length === 0) throw new Error(`No results found in ${inputDirs.join(', ')}`);
   const browsersOf = new Map<string, Set<string>>();
   for (const { record } of loaded) browsersOf.set(record.agent, (browsersOf.get(record.agent) ?? new Set()).add(record.browser));
   const origin = new Map<RunRecord, string>();
@@ -150,7 +163,7 @@ export function writeReport(inputDirs: string[], outDir: string): { leaderboard:
     return row;
   });
   const records = dedupe(labelled);
-  const board = aggregate(records);
+  const board = aggregate(records, notRunLines.filter((line) => !browsersOf.has(line.agent)));
   const relativeTo = (record: RunRecord) => path.relative(outDir, path.join(origin.get(record)!, record.run_dir)) || '.';
   const order = new Map(board.agents.map((agent, index) => [agent.agent, index]));
   records.sort((a, b) => order.get(a.agent)! - order.get(b.agent)! || a.task_id.localeCompare(b.task_id) || a.attempt - b.attempt);
@@ -162,6 +175,7 @@ export function writeReport(inputDirs: string[], outDir: string): { leaderboard:
 <div class="meta">${board.agents.length} agents, ${board.sites.length} sites, ${records.length} runs. Generated ${esc(board.generated_at)}. No run enters payment details or places an order.</div>
 ${tracks.has('reported') ? '<p class="sub">Rows marked <span class="badge">reported</span> ran in the assistant\'s own browser and are graded from what it sent back. Rows marked <span class="badge">observed</span> were watched by the harness. Do not compare the two directly.</p>' : ''}
 <h2>Summary</h2>${summaryTable(board)}
+${board.not_run ? `<h2>Not run</h2>${notRunTable(board)}` : ''}
 <h2>How far each agent gets</h2>${funnels(board)}
 <h2>Site by agent</h2>${grid(board)}
 <h2>Why runs stopped</h2>${reasons(board)}

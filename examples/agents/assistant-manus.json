@@ -1,0 +1,10 @@
+{
+  "name": "manus",
+  "track": "reported",
+  "adapter": "command",
+  "command": "python3 examples/assistant-bridge.py --assistant manus --channel manus",
+  "cwd": "../..",
+  "notes": "Needs ABENCH_DIR and MANUS_API_KEY for the Manus task API.",
+  "status": "needs_account",
+  "status_note": "Needs MANUS_API_KEY, which is not set. Manus declares payment support, so check the account holds no saved card before a run."
+}

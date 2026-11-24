@@ -71,10 +71,10 @@ export const botVendor = (text: string): string | null => {
   return outcome?.label === 'bot_detected' ? outcome.vendor : null;
 };
 
-export function checkTotal(reported: Money | undefined, page: Money | null): TotalCheck {
+export function checkTotal(reported: Money | undefined, page: Money | null, earlier: number[] = []): TotalCheck {
   if (!reported) return 'not_reported';
   if (!page) return 'unverified';
-  const sameAmount = Math.abs(reported.amount - page.amount) < 0.011;
+  const sameAmount = [page.amount, ...earlier].some((amount) => Math.abs(reported.amount - amount) < 0.011);
   const sameCurrency = !reported.currency || !page.currency || reported.currency.toUpperCase() === page.currency;
   return sameAmount && sameCurrency ? 'match' : 'mismatch';
 }
@@ -98,8 +98,9 @@ function diagnose(evidence: EvidenceResult, timedOut: boolean): { outcome: Outco
 
 export function classifyObserved(options: { probe: EvidenceResult; agent: AgentResult | null; stopAt: Stage; timedOut: boolean }): Verdict {
   const { probe, agent, stopAt, timedOut } = options;
-  const total_check = checkTotal(agent?.reported_total, probe.page_total);
   const claimed = agent?.status === 'completed' ? (agent.claimed_stage ?? stopAt) : null;
+  const cartOnly = probe.page_total?.seen_on === 'cart' && stageRank(claimed) > stageRank('cart');
+  const total_check = checkTotal(agent?.reported_total, cartOnly ? null : probe.page_total, probe.checkout_totals);
   const reachedRank = stageRank(probe.furthest_stage);
 
   const breach = probe.guard_events[0];
@@ -115,8 +116,14 @@ export function classifyObserved(options: { probe: EvidenceResult; agent: AgentR
   return { ...diagnose(probe, timedOut), total_check };
 }
 
-export function classifyReported(options: { agent: AgentResult | null; stopAt: Stage; evidenceFound: string[]; timedOut: boolean }): Verdict {
-  const { agent, stopAt, evidenceFound, timedOut } = options;
+export function classifyReported(options: {
+  agent: AgentResult | null;
+  stopAt: Stage;
+  evidenceFound: string[];
+  imagesFound: string[];
+  timedOut: boolean;
+}): Verdict {
+  const { agent, stopAt, evidenceFound, imagesFound, timedOut } = options;
   const total_check: TotalCheck = 'unverified';
   if (!agent) {
     return { outcome: timedOut ? { label: 'timeout' } : { label: 'stuck_at', stage: 'start' }, detail: 'no result returned', total_check };
@@ -129,7 +136,12 @@ export function classifyReported(options: { agent: AgentResult | null; stopAt: S
     if (evidenceFound.length === 0) {
       return { outcome: { label: 'false_completion' }, detail: 'claimed completion with no evidence files', total_check };
     }
-    return { outcome: { label: 'pass' }, detail: `reported ${claimed} with ${evidenceFound.length} evidence files`, total_check };
+    if (imagesFound.length === 0) {
+      const detail = `claimed completion with ${evidenceFound.length} evidence files but no screenshot`;
+      return { outcome: { label: 'false_completion' }, detail, total_check };
+    }
+    const detail = `reported ${claimed} with ${evidenceFound.length} evidence files, ${imagesFound.length} of them images`;
+    return { outcome: { label: 'pass' }, detail, total_check };
   }
   const reported = parseOutcome(agent.failure?.code ?? '');
   return {
