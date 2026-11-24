@@ -5,6 +5,7 @@ Commerce Bench talks to your shopping agent through a small adapter: a program t
 1. Clone this repo next to your agent's code and run `npm install` and `npx playwright install chromium`.
 2. Open your coding agent in a folder where it can read both this repo and your agent.
 3. Paste the prompt below. Fill in the two lines at the top.
+4. To test on a cloud browser too, set an Anchor key first. See [Run it on Anchor](#run-it-on-anchor).
 
 Read the adapter before you run it on real stores. The harness blocks payment requests at the network, but the adapter is your code and you are the one running it.
 
@@ -53,9 +54,55 @@ Write an adapter that lets the harness run my agent. Work in this order.
    - Open results/my-agent/report.html and read the row for that run. Tell me the outcome label, the furthest stage the harness saw, and whether it matches what my agent claimed.
    If the run ends as harness_error, the adapter or the setup is broken. Fix that before anything else. Any other label is a real result, including a failure, so report it as it is and do not tune the adapter to hide it.
 
-7. Stop there. Do not start a run across all stores. Tell me the command for it and let me decide:
+7. If the environment variable ANCHORBROWSER_API_KEY is set, run the same store once more on an Anchor cloud browser and compare the two rows. Check only that the variable is set. Never print it or write it to a file.
+   npm run bench -- run --agent my-agent.json --browser anchor --anchor-config configs/anchor/default.json --site ikea.com --runs 1 --out results/my-agent-anchor --label my-agent@anchor
+   If it is not set, skip this step and tell me how to set it.
+
+8. Stop there. Do not start a run across all stores. Tell me the command for it and let me decide:
    npm run bench -- run --agent my-agent.json --runs 3
 ```
+
+## Run it on Anchor
+
+Many stores turn a laptop browser away before your agent does anything. The same adapter runs unchanged on an [Anchor](https://anchorbrowser.io) cloud browser, so you can see how much of a result is the browser and how much is the agent.
+
+**1. Get a key and set it.** Create one at [app.anchorbrowser.io/api-keys](https://app.anchorbrowser.io/api-keys). The harness reads it from the environment and nowhere else:
+
+```sh
+export ANCHORBROWSER_API_KEY=...
+```
+
+Keep it out of the agent file, the adapter and the prompt. The Free plan is enough for `default.json`.
+
+**2. Run on Anchor.** The harness creates the session, hands your adapter its CDP URL in `task.browser.cdp_url`, saves the session recording next to the run and closes the session afterwards. Your adapter does not call the Anchor API.
+
+```sh
+npm run bench -- run --agent my-agent.json --browser anchor --anchor-config configs/anchor/default.json --site ikea.com --runs 1
+```
+
+Swap the config file to change the session: `stealth.json`, `residential.json` or `mac.json`. What each one turns on, and which plan it needs, is in the README under [Compare browsers](../README.md#compare-browsers).
+
+**3. Optional: give your coding agent the Anchor MCP server.** The harness does not need it. It is useful when you want the coding agent itself to open a page, look at a store, or check a session while it debugs the adapter.
+
+Add the server by URL and sign in when the client asks:
+
+```sh
+claude mcp add --transport http anchor https://api.anchorbrowser.io/v1/mcp
+```
+
+For Cursor and other clients that read a JSON config, add this to `.cursor/mcp.json` or `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "anchor": {
+      "url": "https://api.anchorbrowser.io/v1/mcp"
+    }
+  }
+}
+```
+
+Signing in is the simplest way and puts no key in a file. For CI or a client that cannot open a sign-in page, send the key as an `anchor-api-key` header instead, and keep that config file out of git. The [Anchor MCP docs](https://docs.anchorbrowser.io/advanced/mcp) list every client and the other servers.
 
 ## What to expect
 
