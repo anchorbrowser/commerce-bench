@@ -16,7 +16,7 @@ Results from Commerce Bench. One agent, one network per setup, runs from 23 and 
 | `index.json` | Runs, passes and stores finished per file, and a list of every batch in `all-runs/` |
 | `all-runs/` | Every run row of every pass, unfiltered. See below |
 | `front-door.json` | Each store start page opened once per browser setup, no agent. `opened`, or the outcome label that came back |
-| `recordings/` | Six Anchor session recordings as short GIFs, 10x speed |
+| `recordings/` | Original Anchor session recordings as MP4, one passing run per store that had one (20 files, named `<store>-<setup>.mp4`, full length and unedited), plus six short GIFs at 10x speed |
 
 Each line of a `.jsonl` file is one run record as described in `schema/`, plus `setup`, `config` and `batch`. Session ids are removed, checkout ids in URLs are replaced with `[id]`, and browser connection URLs are removed.
 

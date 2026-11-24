@@ -86,6 +86,8 @@ Recordings of six of the runs that finished, straight from the Anchor sessions:
 
 <sub>Anchor session recordings, played at 10x. Shopper details are placeholders. No card was entered and no order was placed.</sub>
 
+The original full-length recordings, one passing run for each of 20 stores, are in [`results/published/recordings/`](results/published/recordings/).
+
 Every run is in [`results/published/`](results/published/), with the conditions it ran under and what not to read into it. That includes every failed, frozen and superseded run, in [`all-runs/`](results/published/all-runs/). One agent, runs from 23 and 24 November 2026, three runs per store per setup, so a single cell can flip on a repeat. Run it yourself before you quote a number.
 
 ## Quick start
