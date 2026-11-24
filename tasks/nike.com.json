@@ -5,12 +5,12 @@
   "category": "fashion",
   "start_url": "https://www.nike.com/",
   "product": {
-    "name": "Nike Everyday Cushioned Crew Socks (3 Pairs)",
-    "variant": "White, size M",
+    "name": "Nike Everyday Plus Cushioned Training Crew Socks (3 Pairs)",
+    "variant": "White/Black, size M",
     "quantity": 1,
     "match": [
       "everyday",
-      "cushioned",
+      "plus",
       "crew"
     ],
     "variant_match": [

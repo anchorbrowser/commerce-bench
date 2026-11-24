@@ -5,15 +5,16 @@
   "category": "electronics",
   "start_url": "https://www.microcenter.com/",
   "product": {
-    "name": "SanDisk Ultra microSDXC memory card",
-    "variant": "64GB",
+    "name": "Inland 1.75mm PLA 3D Printer Filament 1kg",
+    "variant": "Black",
     "quantity": 1,
     "match": [
-      "sandisk",
-      "ultra"
+      "inland",
+      "pla",
+      "filament"
     ],
     "variant_match": [
-      "64gb"
+      "black"
     ]
   },
   "stop_at": "shipping",

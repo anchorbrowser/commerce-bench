@@ -5,14 +5,14 @@
   "category": "home",
   "start_url": "https://www.ikea.com/us/en/",
   "product": {
-    "name": "FRAKTA carrier bag",
-    "variant": "Large, blue",
+    "name": "KALLAX shelf unit",
+    "variant": "White, 30 1/8x30 1/8 in",
     "quantity": 1,
     "match": [
-      "frakta"
+      "kallax"
     ],
     "variant_match": [
-      "large"
+      "white"
     ]
   },
   "stop_at": "shipping",

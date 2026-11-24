@@ -5,11 +5,12 @@
   "category": "fashion",
   "start_url": "https://www.asos.com/",
   "product": {
-    "name": "ASOS DESIGN crew neck t-shirt in white",
-    "variant": "Size M",
+    "name": "ASOS DESIGN regular fit crew neck t-shirt in white",
+    "variant": "Size M (UK 12-14)",
     "quantity": 1,
     "match": [
       "asos design",
+      "crew neck",
       "t-shirt"
     ],
     "variant_match": [

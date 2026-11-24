@@ -6,16 +6,14 @@
   "start_url": "https://shop.lululemon.com/",
   "product": {
     "name": "Everywhere Belt Bag 1L",
-    "variant": "Black",
+    "variant": "Any color that is in stock",
     "quantity": 1,
     "match": [
       "everywhere",
       "belt",
       "bag"
     ],
-    "variant_match": [
-      "black"
-    ]
+    "variant_match": []
   },
   "stop_at": "shipping",
   "status": "draft"

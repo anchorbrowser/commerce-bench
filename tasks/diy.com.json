@@ -5,15 +5,14 @@
   "category": "home",
   "start_url": "https://www.diy.com/",
   "product": {
-    "name": "WD-40 Multi-use lubricant",
-    "variant": "250ml",
+    "name": "Carbon steel Soft grip Claw Hammer 16oz / 454g",
+    "variant": "Single hammer",
     "quantity": 1,
     "match": [
-      "wd-40"
+      "claw hammer",
+      "16oz"
     ],
-    "variant_match": [
-      "250ml"
-    ]
+    "variant_match": []
   },
   "stop_at": "shipping",
   "status": "draft"

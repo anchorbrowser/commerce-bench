@@ -5,16 +5,15 @@
   "category": "toys",
   "start_url": "https://www.michaels.com/",
   "product": {
-    "name": "Elmer's Liquid School Glue",
-    "variant": "4 oz",
+    "name": "Crayola Boxed Crayons",
+    "variant": "24 count",
     "quantity": 1,
     "match": [
-      "elmer",
-      "school",
-      "glue"
+      "crayola",
+      "crayons"
     ],
     "variant_match": [
-      "4"
+      "24"
     ]
   },
   "stop_at": "shipping",
