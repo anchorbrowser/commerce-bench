@@ -80,20 +80,32 @@ const TOOLS: Anthropic.Beta.BetaToolUnion[] = [
 
 function describePage(): { elements: string[]; text: string } {
   const seen: string[] = [];
+  for (const stale of document.querySelectorAll('[data-cb-id]')) stale.removeAttribute('data-cb-id');
   const nodes = document.querySelectorAll<HTMLElement>(
-    'a[href], button, input:not([type=hidden]), select, textarea, [role=button], [role=link], [role=radio], [role=checkbox], [role=option], [role=combobox], [role=menuitem], [role=tab]'
+    'a[href], button, input:not([type=hidden]), select, textarea, summary, label[for], label:has(input), [role=button], [role=link], [role=radio], [role=checkbox], [role=option], [role=combobox], [role=menuitem], [role=tab]'
+  );
+  const shown = (el: HTMLElement) => {
+    const rect = el.getBoundingClientRect();
+    if (rect.width <= 2 || rect.height <= 2 || rect.bottom <= -200 || rect.top >= innerHeight + 1200) return false;
+    return el.checkVisibility?.({ opacityProperty: true, visibilityProperty: true }) ?? getComputedStyle(el).visibility !== 'hidden';
+  };
+  const rank = (el: HTMLElement) => {
+    const rect = el.getBoundingClientRect();
+    const offScreen = rect.bottom <= 0 || rect.top >= innerHeight ? 1 : 0;
+    const siteMenu = el.closest('nav, header, footer, [role=navigation], [role=banner], [role=menubar], [role=menu]') ? 2 : 0;
+    return offScreen + siteMenu;
+  };
+  const kept = new Set(
+    [...nodes]
+      .filter(shown)
+      .map((el, order) => ({ el, order, rank: rank(el) }))
+      .sort((left, right) => left.rank - right.rank || left.order - right.order)
+      .slice(0, 160)
+      .map((entry) => entry.el)
   );
   let next = 1;
   for (const el of nodes) {
-    const rect = el.getBoundingClientRect();
-    const style = getComputedStyle(el);
-    const visible = rect.width > 2 && rect.height > 2 && style.visibility !== 'hidden' && style.display !== 'none';
-    const near = rect.bottom > -200 && rect.top < innerHeight + 1200;
-    if (!visible || !near) {
-      el.removeAttribute('data-cb-id');
-      continue;
-    }
-    if (next > 140) break;
+    if (!kept.has(el)) continue;
     el.setAttribute('data-cb-id', String(next));
     const input = el as HTMLInputElement;
     const label = (el.innerText || el.getAttribute('aria-label') || input.placeholder || input.labels?.[0]?.innerText || el.getAttribute('title') || input.name || '')
