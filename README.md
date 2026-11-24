@@ -242,6 +242,8 @@ The parser also accepts the result wrapped inside another object, or as a JSON s
 
 `examples/llm-agent.ts` is a complete agent in about 260 lines: a Claude tool-use loop over a numbered list of page elements. Copy it as a starting point, or use it as a baseline to beat.
 
+Using a coding agent? [`docs/adapter-prompt.md`](docs/adapter-prompt.md) is a prompt you can paste to have it write the adapter for your agent.
+
 ## Compare browsers
 
 Many retail sites stop a browser before any shopping starts. That is part of the result, so the harness lets you change the browser and keep everything else the same.
