@@ -13,6 +13,7 @@
   },
   "scripts": {
     "bench": "node --disable-warning=ExperimentalWarning src/cli.ts",
+    "site": "node site/build.mjs",
     "selftest": "node --disable-warning=ExperimentalWarning src/cli.ts selftest",
     "validate": "node --disable-warning=ExperimentalWarning src/cli.ts validate",
     "test": "node --disable-warning=ExperimentalWarning --test test/*.test.ts",
