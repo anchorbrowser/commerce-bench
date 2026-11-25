@@ -31,6 +31,8 @@ Three things it does that a self-reported score does not:
 
 One small reference agent, one task per store: find the named product, put it in the cart, check out as a guest and get the shipping details accepted. Same agent, same stores, same grader. Only the browser changed. Getting in is the browser's job. Finishing after that is the agent's.
 
+The same results as a page, with every session recording: [commerce-bench.vercel.app](https://commerce-bench.vercel.app/). It is built from `results/published/` by `npm run site`.
+
 <!-- results:begin -->
 | Browser | Stores finished | Runs passed | Turned away | Store needs an account | Got in, agent did not finish |
 |---|---|---|---|---|---|
@@ -71,12 +73,12 @@ npm run bench -- run --agent examples/agents/llm-claude.json --browser anchor --
 ```
 <!-- results:end -->
 
-Recordings of six of the runs that finished, straight from the Anchor sessions:
+Recordings of six runs that passed, straight from the Anchor sessions:
 
 | sephora.com | uniqlo.com | lookfantastic.com |
 |---|---|---|
-| ![Recording of the reference agent shopping sephora.com on Anchor Mac hardware](results/published/recordings/sephora-anchor-mac.gif) | ![Recording of the reference agent shopping uniqlo.com on Anchor Mac hardware](results/published/recordings/uniqlo-anchor-mac.gif) | ![Recording of the reference agent shopping lookfantastic.com on Anchor Mac hardware](results/published/recordings/lookfantastic-anchor-mac.gif) |
-| Bot wall on a laptop and on a default session. Finished on Mac hardware. | Bot wall on a laptop and on a default session. Finished on Mac hardware. | A passing run on Mac hardware from the first pass. Later repeats stalled in checkout, so the store is not counted as finished. |
+| ![Recording of the reference agent shopping sephora.com on Anchor Mac hardware](results/published/recordings/sephora-anchor-mac.gif) | ![Recording of the reference agent shopping uniqlo.com on Anchor Mac hardware](results/published/recordings/uniqlo-anchor-mac.gif) | ![Recording of the reference agent shopping lookfantastic.com through Anchor](results/published/recordings/lookfantastic-anchor-default.gif) |
+| Bot wall on a laptop and on a default session. Finished on Mac hardware. | Bot wall on a laptop and on a default session. Finished on Mac hardware. | Stalled in checkout on a laptop and on Mac hardware. One run of three passed on a default session, shown here, so the store is not counted as finished. |
 | **lego.com** | **staples.com** | **bestbuy.com** |
 | ![Recording of the reference agent shopping lego.com through Anchor](results/published/recordings/lego-anchor-default.gif) | ![Recording of the reference agent shopping staples.com through Anchor](results/published/recordings/staples-anchor-default.gif) | ![Recording of the reference agent shopping bestbuy.com on Anchor Mac hardware](results/published/recordings/bestbuy-anchor-mac.gif) |
 | Cloudflare wall on a laptop. Finished on an Anchor default session. | Access denied at checkout on a laptop. Finished on an Anchor default session. | Finished on a laptop, on a default session and on Mac hardware. Shown for a full run from search to shipping. |
@@ -85,7 +87,7 @@ Recordings of six of the runs that finished, straight from the Anchor sessions:
 
 The original full-length recordings, one passing run for each of 21 stores, are in [`results/published/recordings/`](results/published/recordings/).
 
-Every run is in [`results/published/`](results/published/), with the conditions it ran under and what not to read into it. That includes every failed, frozen and superseded run, in [`all-runs/`](results/published/all-runs/). One agent, runs from 23 and 24 November 2026, three runs per store per setup, so a single cell can flip on a repeat. Run it yourself before you quote a number.
+Every run is in [`results/published/`](results/published/), with the conditions it ran under and what not to read into it. That includes every failed, frozen and superseded run, in [`all-runs/`](results/published/all-runs/). One agent, runs from 23 to 25 November 2026, three runs per store per setup, so a single cell can flip on a repeat. Run it yourself before you quote a number.
 
 ## Quick start
 
@@ -100,7 +102,7 @@ npx playwright install chromium
 npm run selftest
 ```
 
-`selftest` starts a local mock shop and runs a scripted agent through 11 cases: an honest run, an agent that claims more than it did, one that reports a wrong total, one that tries to pay, one that obeys an instruction planted in page text, a bot wall, a login wall, a rejected address and a sold-out product. It passes only when the grader labels all 11 correctly, then writes a report.
+`selftest` starts a local mock shop and runs a scripted agent through 15 checks: an honest run, an agent that claims more than it did, one that reports a wrong total, one that tries to pay, one that obeys an instruction planted in page text, a bot wall, a login wall, a rejected address and a sold-out product. It passes only when the grader labels all 15 correctly, then writes a report.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/report-dark.png">
@@ -429,6 +431,8 @@ examples/    reference agents: scripted (mock shop), open-only, Claude loop, ass
 mockshop/    local store used by selftest, with planted traps
 schema/      JSON Schemas for the task, the result and the leaderboard
 scripts/     builds the store grid image from published results
+site/        the results page, built from published results with npm run site
+docs/        a prompt for writing an adapter with a coding agent
 results/     published/ holds the published results and every raw run; your own runs land here too and stay out of git
 test/        unit tests for the grader and the stage rules
 ```
