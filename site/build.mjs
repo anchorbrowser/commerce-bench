@@ -4,9 +4,12 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const repo = path.resolve(here, process.argv[2] ?? '..');
+const repo = path.resolve(here, '..');
 const published = path.join(repo, 'results/published');
-const rel = path.relative(here, published);
+const distFlag = process.argv.indexOf('--dist');
+const dist = distFlag > 0 ? path.resolve(process.argv[distFlag + 1]) : null;
+const out = dist ?? here;
+const rel = dist ? '.' : path.relative(here, published);
 
 const readRuns = (file) => {
   const full = path.join(published, file);
@@ -105,7 +108,8 @@ const stores = Object.keys(sets.best).sort((a, b) => {
 const tally = (id) => Object.fromEntries(ORDER.map((ending) => [ending, Object.keys(sets[id]).filter((site) => sets[id][site].ending === ending).sort()]));
 const best = tally('best');
 const date = new Date(`${index.date}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
-const finishedOn = (setup) => best.finished.filter((site) => picks[site].setup === setup);
+const onDefault = best.finished.filter((site) => sets.default[site]?.ending === 'finished');
+const needMac = best.finished.filter((site) => !onDefault.includes(site));
 
 const logo = (site, size = 20) => {
   const file = path.join(here, 'logos', `${site}.png`);
@@ -302,8 +306,8 @@ const html = `<!doctype html>
 </section>
 
 <section class="picks" aria-label="Three findings">
-  <article><h2>${finishedOn('anchor-default').length} stores finish on a default session</h2><p>No proxy, no stealth settings, nothing tuned for the store.</p>${logoRow(finishedOn('anchor-default'))}</article>
-  <article><h2>${finishedOn('anchor-mac').length} more need Mac hardware</h2><p>These stores turned other sessions away or stalled them. A real Mac got through.</p>${logoRow(finishedOn('anchor-mac'))}</article>
+  <article><h2>${onDefault.length} stores finish on a default session</h2><p>No proxy, no stealth settings, nothing tuned for the store.</p>${logoRow(onDefault)}</article>
+  <article><h2>${needMac.length} more need Mac hardware</h2><p>These stores turned a default session away. A real Mac got through.</p>${logoRow(needMac)}</article>
   <article><h2>${best.blocked.length} stayed shut on every setup</h2><p>A bot wall or an error page ended most runs, whichever browser was used.</p>${logoRow(best.blocked)}</article>
 </section>
 
@@ -350,12 +354,17 @@ ${recordings(clips)}
     <div class="foot-brand"><a class="brand" href="#top">Commerce Bench</a><p>An open harness for testing shopping agents on real stores. Built by <a href="https://anchorbrowser.io/">Anchor Browser</a>, the cloud browser for AI agents.</p></div>
     <nav class="foot-social" aria-label="Follow Anchor"><span>Follow Anchor</span><a href="https://x.com/AnchorBrowser">${agentIcon('x')}X</a><a href="https://www.linkedin.com/company/anchorbrowser/">${agentIcon('linkedin')}LinkedIn</a><a href="https://github.com/anchorbrowser">${agentIcon('github')}GitHub</a></nav>
   </div>
-  <div class="foot-legal"><span>\u00a9 ${new Date(`${index.date}T00:00:00Z`).getUTCFullYear()} <a href="https://anchorbrowser.io/">Anchor Browser</a>. Code under Apache-2.0.</span><a href="https://github.com/anchorbrowser/commerce-bench/tree/v0-harness/results/published">Every run row is in the repository</a></div>
+  <div class="foot-legal"><span>\u00a9 ${new Date(`${index.date}T00:00:00Z`).getUTCFullYear()} <a href="https://anchorbrowser.io/">Anchor Browser</a>. Code under Apache-2.0.</span><a href="https://github.com/anchorbrowser/commerce-bench/tree/main/results/published">Every run row is in the repository</a></div>
 </footer>
 <div class="tip" role="tooltip" hidden></div>
-<script>${js}</script>
+<script>${js}</script>${dist ? '\n<script defer src="/_vercel/insights/script.js"></script>' : ''}
 </body>
 </html>
 `;
-fs.writeFileSync(path.join(here, 'index.html'), html);
-console.log(JSON.stringify({ stores: stores.length, best: Object.fromEntries(ORDER.map((e) => [e, best[e].length])), local: Object.fromEntries(ORDER.map((e) => [e, local[e].length])), default: finishedOn('anchor-default').length, mac: finishedOn('anchor-mac').length }));
+if (dist) {
+  fs.mkdirSync(path.join(dist, 'recordings'), { recursive: true });
+  fs.cpSync(path.join(here, 'logos'), path.join(dist, 'logos'), { recursive: true });
+  for (const clip of clips) fs.copyFileSync(path.join(published, 'recordings', clip.file), path.join(dist, 'recordings', clip.file));
+}
+fs.writeFileSync(path.join(out, 'index.html'), html);
+console.log(JSON.stringify({ stores: stores.length, best: Object.fromEntries(ORDER.map((e) => [e, best[e].length])), local: Object.fromEntries(ORDER.map((e) => [e, local[e].length])), default: onDefault.length, mac: needMac.length }));
