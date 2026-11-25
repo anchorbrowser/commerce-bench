@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-24",
+  "date": "2026-11-25",
   "agent": "examples/llm-agent.ts (claude-opus-5-5)",
   "finished_rule": "A store is finished when more than half of its graded runs pass. harness_error runs are not graded.",
   "sets": [
@@ -14,15 +14,15 @@
     {
       "setup": "anchor-default",
       "runs": 90,
-      "graded_runs": 81,
+      "graded_runs": 84,
       "stores": 30,
-      "passed_runs": 36,
+      "passed_runs": 37,
       "stores_finished": 14
     },
     {
       "setup": "anchor-stealth",
       "runs": 18,
-      "graded_runs": 15,
+      "graded_runs": 17,
       "stores": 6,
       "passed_runs": 2,
       "stores_finished": 1
@@ -46,14 +46,14 @@
     {
       "setup": "anchor-best",
       "runs": 90,
-      "graded_runs": 84,
+      "graded_runs": 87,
       "stores": 30,
-      "passed_runs": 54,
+      "passed_runs": 55,
       "stores_finished": 19
     }
   ],
   "all_runs": {
-    "rows": 543,
+    "rows": 549,
     "guard_breaches": 0,
     "batches": [
       {
@@ -147,6 +147,15 @@
         "guard_breaches": 0
       },
       {
+        "batch": "rerun-v12/anchor",
+        "setup": "anchor-default",
+        "file": "all-runs/rerun-v12--anchor.jsonl",
+        "rows": 3,
+        "harness_errors": 0,
+        "passed": 1,
+        "guard_breaches": 0
+      },
+      {
         "batch": "rerun-v7/stealth",
         "setup": "anchor-stealth",
         "file": "all-runs/rerun-v7--stealth.jsonl",
@@ -160,6 +169,15 @@
         "setup": "anchor-stealth",
         "file": "all-runs/rerun-v9--stealth.jsonl",
         "rows": 6,
+        "harness_errors": 0,
+        "passed": 0,
+        "guard_breaches": 0
+      },
+      {
+        "batch": "rerun-v12/stealth",
+        "setup": "anchor-stealth",
+        "file": "all-runs/rerun-v12--stealth.jsonl",
+        "rows": 3,
         "harness_errors": 0,
         "passed": 0,
         "guard_breaches": 0

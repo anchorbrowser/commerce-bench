@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-24",
+  "date": "2026-11-25",
   "rule": "For each store, the Anchor setup with the most passing runs. On a tie, the setup whose runs got furthest, then the lightest (default, stealth, residential, Mac). A store is finished when more than half of its graded runs pass. harness_error runs are not graded.",
   "stores": {
     "amazon.com": {
@@ -61,8 +61,8 @@
     "diy.com": {
       "setup": "anchor-default",
       "finished": false,
-      "passes": 0,
-      "graded": 0,
+      "passes": 1,
+      "graded": 3,
       "runs": 3,
       "config": "configs/anchor/default.json"
     },

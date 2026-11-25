@@ -34,9 +34,9 @@ One small reference agent, one task per store: find the named product, put it in
 <!-- results:begin -->
 | Browser | Stores finished | Runs passed | Turned away | Store needs an account | Got in, agent did not finish |
 |---|---|---|---|---|---|
-| **Anchor, best setup per store** | **19 of 30** | 54 of 84 | 5 | 2 | 4 |
+| **Anchor, best setup per store** | **19 of 30** | 55 of 87 | 5 | 2 | 4 |
 | Anchor on Mac hardware | 17 of 30 | 47 of 88 | 5 | 1 | 7 |
-| Anchor, default session | 14 of 30 | 36 of 81 | 13 | 1 | 2 |
+| Anchor, default session | 14 of 30 | 37 of 84 | 13 | 1 | 2 |
 | Chromium on a laptop | 7 of 30 | 20 of 89 | 18 | 1 | 4 |
 
 <sub>30 stores, 3 runs per store on each browser. A store counts as finished when more than half of its graded runs pass. Runs where the harness itself failed (`harness_error`) are not graded. "Turned away" means the agent never reached a product page, or a bot wall or error page ended most runs. Best setup per store takes, for each store, the Anchor setup with the most passing runs. On a tie it takes the setup whose runs got furthest, then the lightest. It is picked after the runs, so read it as a guide to which setup to use for a store, not as one fixed configuration.</sub>
@@ -53,7 +53,7 @@ What stands out:
 - **Two stores need an account.** `amazon.com` and `walmart.com` asked the shopper to sign in before checkout, with no guest path. That is the store's rule, not a browser block. The task asks for guest checkout, so they do not count as finished.
 - **Still open.** Even on the best setup, `ebay.com`, `michaels.com`, `smythstoys.com`, `target.com` and `wayfair.com` turned the agent away with a bot wall or an error page in most runs. In `autozone.com`, `diy.com`, `lookfantastic.com` and `microcenter.com` the agent got in and did not finish. The reference agent is a bundled example of about 260 lines. A stronger agent can move that number with no change to the browser.
 - **No false claims in the published runs.** None of the 309 published runs ended as `false_completion`.
-- **Nothing was bought.** 543 runs recorded, superseded reruns included. No card entered, no order placed, zero guard breaches.
+- **Nothing was bought.** 549 runs recorded, superseded reruns included. No card entered, no order placed, zero guard breaches.
 
 ### Which Anchor setup finished which store
 
@@ -62,7 +62,7 @@ What stands out:
 | Anchor, default session | [`configs/anchor/default.json`](configs/anchor/default.json) | 10 | asos.com, barnesandnoble.com, bestbuy.com, dunelm.com, elfcosmetics.com, ikea.com, petsmart.com, quince.com, staples.com, ulta.com |
 | Anchor on Mac hardware | [`configs/anchor/mac.json`](configs/anchor/mac.json) | 9 | apple.com, carters.com, homedepot.com, hp.com, lego.com, lululemon.com, nike.com, sephora.com, uniqlo.com |
 
-Each store is listed once, under the setup with the most passing runs, the lightest on a tie. A heavier setup may also have finished it. The rows for every setup are in [`results/published/`](results/published/), and the pick for each store is in [`best-setup.json`](results/published/best-setup.json). Not finished on any Anchor setup tried yet, leaving out the stores that need an account: `autozone.com` (Mac hardware, 0 of 3 runs passed), `diy.com` (default session, 0 of 0 runs passed), `ebay.com` (default session, 0 of 3 runs passed), `lookfantastic.com` (default session, 1 of 3 runs passed), `michaels.com` (residential proxy + stealth, 0 of 3 runs passed), `microcenter.com` (proxy + extra stealth + captcha solving, 0 of 3 runs passed), `smythstoys.com` (default session, 0 of 3 runs passed), `target.com` (proxy + extra stealth + captcha solving, 0 of 3 runs passed), `wayfair.com` (default session, 0 of 3 runs passed).
+Each store is listed once, under the setup with the most passing runs, the lightest on a tie. A heavier setup may also have finished it. The rows for every setup are in [`results/published/`](results/published/), and the pick for each store is in [`best-setup.json`](results/published/best-setup.json). Not finished on any Anchor setup tried yet, leaving out the stores that need an account: `autozone.com` (Mac hardware, 0 of 3 runs passed), `diy.com` (default session, 1 of 3 runs passed), `ebay.com` (default session, 0 of 3 runs passed), `lookfantastic.com` (default session, 1 of 3 runs passed), `michaels.com` (residential proxy + stealth, 0 of 3 runs passed), `microcenter.com` (proxy + extra stealth + captcha solving, 0 of 3 runs passed), `smythstoys.com` (default session, 0 of 3 runs passed), `target.com` (proxy + extra stealth + captcha solving, 0 of 3 runs passed), `wayfair.com` (default session, 0 of 3 runs passed).
 
 To repeat one, for example `apple.com`:
 
@@ -83,7 +83,7 @@ Recordings of six of the runs that finished, straight from the Anchor sessions:
 
 <sub>Anchor session recordings, played at 10x. Shopper details are placeholders. No card was entered and no order was placed.</sub>
 
-The original full-length recordings, one passing run for each of 20 stores, are in [`results/published/recordings/`](results/published/recordings/).
+The original full-length recordings, one passing run for each of 21 stores, are in [`results/published/recordings/`](results/published/recordings/).
 
 Every run is in [`results/published/`](results/published/), with the conditions it ran under and what not to read into it. That includes every failed, frozen and superseded run, in [`all-runs/`](results/published/all-runs/). One agent, runs from 23 and 24 November 2026, three runs per store per setup, so a single cell can flip on a repeat. Run it yourself before you quote a number.
 
