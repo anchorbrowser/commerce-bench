@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commerce Bench: which stores let a shopping agent check out</title>
+<script>document.documentElement.dataset.theme=new URLSearchParams(location.search).get('theme')||localStorage.getItem('cb-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400..700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>:root{
+  --floor:#eef0ec;--paper:#ffffff;--ink:#15171a;--ink2:#474c54;--muted:#6d737c;--line:#dcdfd9;--line2:#c4c8c1;--track:#e6e9e4;
+  --finished:#0aac23;--agent:#8b9099;--signin:#d9940a;--blocked:#dc3c3d;
+  --finished-ink:#006c10;--agent-ink:#474c54;--signin-ink:#7a5200;--blocked-ink:#a81f20;
+  --finished-bg:#e2f4e4;--agent-bg:#e9ebe8;--signin-bg:#fbefd0;--blocked-bg:#fbe4e4;
+  --link:#1b3fd0;--receipt:#fffef9;--receipt-ink:#1d1d1b;
+  --serif:"Instrument Serif","Iowan Old Style",Georgia,serif;
+  --sans:"Instrument Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --ease-out:cubic-bezier(.23,1,.32,1);
+}
+:root[data-theme=dark]{
+  --floor:#111213;--paper:#191919;--ink:#f1f2ef;--ink2:#c2c6c0;--muted:#979c95;--line:#2c2e2c;--line2:#3c3f3c;--track:#2a2c2a;
+  --agent:#7d828b;--signin:#fbb315;
+  --finished-ink:#53c556;--agent-ink:#c2c6c0;--signin-ink:#f0c05a;--blocked-ink:#f38d8d;
+  --finished-bg:#12301a;--agent-bg:#262826;--signin-bg:#33290c;--blocked-bg:#3a1616;
+  --link:#9db1ff;--receipt:#f4f2ea;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--floor);color:var(--ink);font:16px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--link);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--link);outline-offset:2px;border-radius:4px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+h1,h2,h3,p,ul,dl,dd,figure{margin:0}
+ul{padding:0;list-style:none}
+
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:24px;padding:12px 32px;background:color-mix(in srgb,var(--floor) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.brand{font:400 22px/1 var(--serif);color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+.top nav{display:flex;gap:4px;margin:0 auto}
+.top nav a{padding:6px 12px;border-radius:8px;color:var(--ink2);text-decoration:none;font-size:14.5px;font-weight:500;transition:background-color 150ms ease}
+.top-end{display:flex;align-items:center;gap:14px;font-size:14px}
+.theme{font:500 14px var(--sans);color:var(--ink2);background:none;border:1px solid var(--line2);border-radius:8px;padding:5px 10px;cursor:pointer;transition:transform 160ms var(--ease-out)}
+.theme:active{transform:scale(.97)}
+.gh{color:var(--ink);font-weight:500}
+
+main{max-width:1180px;margin:0 auto;padding:0 32px 96px}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:56px;align-items:start;padding:72px 0 56px}
+h1{font:400 clamp(44px,6.2vw,78px)/.98 var(--serif);letter-spacing:-.022em;max-width:13ch;text-wrap:balance}
+.lede{margin-top:24px;max-width:58ch;font-size:18.5px;line-height:1.5;color:var(--ink2);text-wrap:pretty}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.copy,.star{display:inline-flex;align-items:center;gap:12px;height:48px;padding:0 20px;border-radius:999px;font:600 15.5px var(--sans);cursor:pointer;text-decoration:none;transition:transform 160ms var(--ease-out)}
+.copy{background:var(--ink);color:var(--floor);border:0}
+.star{background:var(--paper);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line2);gap:9px}
+.star svg{color:var(--signin)}
+.copy:active,.star:active{transform:scale(.97)}
+.copy-icons{display:inline-flex;gap:9px;opacity:.86}
+.copy-icons svg{display:block}
+.copy-label{display:grid}
+.copy-label>span{grid-area:1/1;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;transition:opacity 180ms ease,filter 180ms ease,transform 180ms var(--ease-out)}
+.copy[data-state=idle] [data-when=done],.copy[data-state=done] [data-when=idle]{opacity:0;filter:blur(3px);transform:translateY(4px)}
+.star-n{font:500 13.5px var(--mono);color:var(--ink2);padding-left:9px;border-left:1px solid var(--line2);font-variant-numeric:tabular-nums}
+.cta-note{margin-top:12px;font-size:14px;color:var(--muted);max-width:56ch}
+.meta{display:flex;flex-wrap:wrap;gap:0;margin-top:32px;border-top:1px solid var(--line2)}
+.meta div{padding:12px 28px 0 0;margin-right:28px;border-right:1px solid var(--line)}
+.meta div:last-child{border-right:0}
+.meta dt{font-size:13px;color:var(--muted)}
+.meta dd{font:500 17px/1.3 var(--mono);font-variant-numeric:tabular-nums}
+
+.receipt{position:relative;background:var(--receipt);color:var(--receipt-ink);font:400 13.5px/1.5 var(--mono);padding:22px 20px 30px;transform:rotate(1.4deg);box-shadow:0 1px 1px rgb(0 0 0/.05),0 12px 30px -8px rgb(0 0 0/.22);
+  --tooth:9px;-webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/var(--tooth) 51% repeat-x,linear-gradient(#000 0 0) top/100% 51% no-repeat;mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/var(--tooth) 51% repeat-x,linear-gradient(#000 0 0) top/100% 51% no-repeat;
+  animation:print 900ms var(--ease-out) both}
+@keyframes print{from{clip-path:inset(0 0 100% 0);transform:rotate(1.4deg) translateY(-14px)}to{clip-path:inset(0 0 0 0);transform:rotate(1.4deg)}}
+.r-head{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;padding-bottom:4px}
+.r-head strong{font:400 26px/1.1 var(--serif);letter-spacing:-.01em}
+.r-head span{font-size:12.5px;opacity:.7}
+.r-rule{border-top:1px dashed rgb(29 29 27/.45);margin:10px 0}
+.r-line,.r-total{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.r-line span{display:flex;align-items:center;gap:8px}
+.r-line b,.r-total b{font-weight:500;font-variant-numeric:tabular-nums}
+.r-total{font-size:17px;font-weight:600}
+.r-total b{font-weight:600}
+.r-bars{display:flex;align-items:stretch;height:38px;margin:18px 0 8px;justify-content:center}
+.r-bars i{background:var(--receipt-ink)}
+.r-foot{text-align:center;font-size:12px;opacity:.75}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px;flex:none}
+.sw.finished,.seg.finished,.cell.finished{background:var(--finished)}
+.sw.agent,.seg.agent,.cell.agent{background:var(--agent)}
+.sw.signin,.seg.signin,.cell.signin{background:var(--signin)}
+.sw.blocked,.seg.blocked,.cell.blocked{background:var(--blocked)}
+
+.picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)}
+.picks article{padding:28px 32px 30px 0}
+.picks article+article{padding-left:32px;border-left:1px solid var(--line)}
+.picks h2{font:400 30px/1.08 var(--serif);letter-spacing:-.012em;text-wrap:balance}
+.picks p{margin:10px 0 18px;color:var(--ink2);font-size:15px;max-width:34ch}
+.logos{display:flex;flex-wrap:wrap;gap:8px}
+.logos li{display:grid;place-items:center;width:36px;height:36px;background:var(--paper);border-radius:9px;box-shadow:0 0 0 1px var(--line)}
+.logo{display:block;object-fit:contain;border-radius:4px;flex:none}
+.logo.ph{display:grid;place-items:center;background:var(--track);color:var(--ink2);font:600 11px var(--sans)}
+
+.panel{margin-top:72px}
+.panel-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 24px;margin-bottom:22px}
+.panel-head h2{font:400 34px/1.1 var(--serif);letter-spacing:-.014em}
+.panel-head p{color:var(--ink2);font-size:15.5px;max-width:62ch}
+
+.legend{display:flex;flex-wrap:wrap;gap:6px 22px;margin-bottom:16px;font-size:14px;color:var(--ink2)}
+.legend li{display:flex;align-items:center;gap:8px}
+.bars{background:var(--paper);border-radius:16px;box-shadow:0 0 0 1px var(--line);padding:10px 24px}
+.bar-row{display:grid;grid-template-columns:250px minmax(0,1fr);gap:20px;align-items:center;padding:14px 0}
+.bar-row+.bar-row{border-top:1px solid var(--line)}
+.bar-name{font-size:15px;color:var(--ink2)}
+.bar-row.lead .bar-name{color:var(--ink);font-weight:600}
+.bar{display:flex;gap:2px;height:30px}
+.bar-row.lead .bar{height:38px}
+.seg{display:flex;align-items:center;padding:0 9px;min-width:0;cursor:default;transition:filter 150ms ease}
+.seg:first-child{border-radius:5px 0 0 5px}.seg:last-child{border-radius:0 5px 5px 0}
+.seg b{font:600 13.5px var(--mono);color:#fff;font-variant-numeric:tabular-nums}
+.seg.signin b{color:#0b0b0b}
+.seg:focus-visible{outline-offset:1px}
+
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.filters button{display:flex;align-items:center;gap:8px;font:500 14px var(--sans);color:var(--ink2);background:var(--paper);border:1px solid var(--line2);border-radius:999px;padding:6px 8px 6px 14px;cursor:pointer;transition:transform 160ms var(--ease-out),background-color 150ms ease,color 150ms ease}
+.filters button span{font:500 12.5px var(--mono);background:var(--track);color:var(--ink2);border-radius:999px;padding:1px 8px}
+.filters button:active{transform:scale(.97)}
+.filters button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.filters button[aria-pressed=true] span{background:color-mix(in srgb,var(--paper) 18%,transparent);color:var(--paper)}
+
+.scroll{overflow-x:auto;background:var(--paper);border-radius:16px;box-shadow:0 0 0 1px var(--line)}
+table{width:100%;border-collapse:collapse;font-size:15px;min-width:900px}
+thead th{position:sticky;top:0;text-align:left;font:500 13px var(--sans);color:var(--muted);padding:14px 16px 12px;border-bottom:1px solid var(--line2);white-space:nowrap}
+tbody th,tbody td{padding:9px 16px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;font-weight:400}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
+thead th:first-child,tbody th{padding-left:24px}
+thead th:last-child,tbody td:last-child{padding-right:24px}
+.store{display:flex;align-items:center;gap:12px}
+.store strong{display:block;font-weight:600;line-height:1.25}
+small{display:block;font-size:13px;color:var(--muted);line-height:1.3}
+.c-setup{color:var(--ink2);white-space:nowrap}
+.track{display:grid;grid-template-columns:repeat(5,26px);gap:2px}
+.track i{height:8px;background:var(--track)}
+.track i:first-child{border-radius:4px 0 0 4px}.track i:last-child{border-radius:0 4px 4px 0}
+.track i.done{background:var(--finished)}
+.track i.part{background:var(--agent)}
+.track i.shut{background:var(--blocked)}
+.where{display:block;margin-top:5px;font-size:13px;color:var(--muted);white-space:nowrap}
+.c-runs{white-space:nowrap}
+.dots{display:inline-flex;gap:5px;vertical-align:middle;margin-right:10px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--track);box-shadow:inset 0 0 0 1.5px var(--line2)}
+.dot.pass{background:var(--finished);box-shadow:none}
+.dot.void{background:none;box-shadow:inset 0 0 0 1.5px var(--line2);background-image:linear-gradient(135deg,transparent 44%,var(--line2) 44% 56%,transparent 56%)}
+.num{font:500 14px var(--mono);font-variant-numeric:tabular-nums;color:var(--ink2)}
+.strip,.strip-head{display:inline-grid;grid-template-columns:repeat(5,14px);gap:4px}
+.strip-head abbr{text-decoration:none;text-align:center;font:500 12px var(--mono)}
+.cell{width:14px;height:14px;border-radius:4px}
+.cell.none{box-shadow:inset 0 0 0 1.5px var(--line2)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;line-height:1;padding:5px 10px 5px 8px;border-radius:999px;white-space:nowrap}
+.chip.finished{background:var(--finished-bg);color:var(--finished-ink)}
+.chip.agent{background:var(--agent-bg);color:var(--agent-ink)}
+.chip.signin{background:var(--signin-bg);color:var(--signin-ink)}
+.chip.blocked{background:var(--blocked-bg);color:var(--blocked-ink)}
+.c-end small{margin-top:5px}
+.foot{margin-top:12px;font-size:13.5px;color:var(--muted);max-width:90ch}
+
+.causes{background:var(--paper);border-radius:16px;box-shadow:0 0 0 1px var(--line);padding:6px 24px}
+.causes>li{display:grid;grid-template-columns:230px 56px 180px minmax(0,1fr);gap:20px;align-items:start;padding:20px 0}
+.causes>li+li{border-top:1px solid var(--line)}
+.cause strong{display:block;font-weight:600;line-height:1.3}
+.who{display:inline-block;margin-top:8px;font-size:12.5px;font-weight:600;line-height:1;padding:5px 9px;border-radius:999px}
+.who.agent{background:var(--agent-bg);color:var(--agent-ink)}
+.who.signin{background:var(--signin-bg);color:var(--signin-ink)}
+.who.blocked{background:var(--blocked-bg);color:var(--blocked-ink)}
+.cause-n{font:500 22px/1 var(--mono);color:var(--ink);font-variant-numeric:tabular-nums}
+.cause-n small{font:400 12.5px var(--sans);margin-top:5px}
+.causes .logos li{background:var(--floor)}
+.cause-why{color:var(--ink2);font-size:15px;line-height:1.5;max-width:60ch;text-wrap:pretty}
+
+.evgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.ev{background:var(--paper);border-radius:14px;box-shadow:0 0 0 1px var(--line);overflow:hidden}
+.ev-media{position:relative;background:var(--track);border-bottom:1px solid var(--line)}
+.ev video{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;object-position:left top;background:var(--track)}
+.ev-play{position:absolute;inset:0;display:grid;place-items:center;border:0;padding:0;font:inherit;cursor:pointer;background:linear-gradient(to top,rgb(0 0 0/.16),rgb(0 0 0/0) 30%)}
+.ev-disc{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:rgb(255 255 255/.94);color:#15171a;box-shadow:0 0 0 1px rgb(0 0 0/.06),0 1px 2px rgb(0 0 0/.16),0 8px 22px rgb(0 0 0/.18);transition:transform 160ms var(--ease-out),opacity 180ms var(--ease-out)}
+.ev-disc svg{margin-left:2px}
+.ev-time{position:absolute;right:8px;bottom:8px;font:500 12px/1 var(--mono);color:#fff;padding:5px 7px;border-radius:6px;background:rgb(11 11 11/.66)}
+.ev-bar{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--finished);transform:scaleX(0);transform-origin:left;opacity:0;transition:opacity 150ms ease}
+.ev-play:active .ev-disc{transform:scale(.97)}
+.ev-media.preview .ev-disc{opacity:0}
+.ev-media.preview .ev-bar{opacity:1}
+.ev-media.playing .ev-play,.ev-media.playing .ev-bar{display:none}
+.ev figcaption{padding:12px 14px 14px}
+.ev-site{display:flex;align-items:center;gap:10px;margin-bottom:4px;font-size:15px}
+.ev-site .chip{margin-left:auto}
+
+.method .cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:1px solid var(--line2)}
+.method .cols div{padding:22px 32px 0 0}
+.method .cols div+div{padding-left:32px;border-left:1px solid var(--line)}
+.method h3{font:600 15.5px var(--sans);margin-bottom:6px}
+.method p{color:var(--ink2);font-size:15px}
+footer{max-width:1180px;margin:0 auto;padding:40px 32px 48px;border-top:1px solid var(--line2);font-size:14.5px;color:var(--ink2)}
+.foot-main{display:flex;flex-wrap:wrap;justify-content:space-between;gap:28px 48px}
+.foot-brand p{margin-top:10px;max-width:46ch}
+.foot-social{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.foot-social span{margin-right:6px;color:var(--muted)}
+.foot-social a{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:999px;color:var(--ink);font-weight:500;text-decoration:none;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line2);transition:transform 160ms var(--ease-out)}
+.foot-social a:active{transform:scale(.97)}
+.foot-legal{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 24px;margin-top:32px;padding-top:18px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted)}
+footer a{color:inherit}
+
+.tip{position:absolute;z-index:10;max-width:300px;padding:8px 10px;border-radius:8px;background:var(--ink);color:var(--paper);font-size:13px;line-height:1.4;pointer-events:none;box-shadow:0 6px 20px rgb(0 0 0/.18)}
+.tip strong{display:block;font-weight:600}
+.tip span{display:block;margin-top:2px;opacity:.8}
+
+@media (hover:hover) and (pointer:fine){
+  .top nav a:hover{background:var(--track)}
+  tbody tr:hover{background:color-mix(in srgb,var(--track) 45%,transparent)}
+  .seg:hover{filter:brightness(1.08)}
+  .star:hover{box-shadow:inset 0 0 0 1px var(--ink2)}
+}
+@media (max-width:980px){
+  .top nav{display:none}.top-end{margin-left:auto}
+  .hero{grid-template-columns:1fr;gap:40px;padding-top:48px}
+  .receipt{max-width:340px;justify-self:start}
+  .picks,.method .cols{grid-template-columns:1fr}
+  .picks article,.picks article+article,.method .cols div,.method .cols div+div{padding:24px 0;border-left:0}
+  .picks article+article,.method .cols div+div{border-top:1px solid var(--line)}
+  .bar-row{grid-template-columns:1fr;gap:6px}
+  .causes>li{grid-template-columns:minmax(0,1fr) auto;gap:12px 16px}
+  .causes .cause-why{grid-column:1/-1}
+  .evgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .causes .logos{grid-column:1/-1}
+}
+@media (max-width:640px){
+  main{padding:0 18px 72px}.top{padding-left:18px;padding-right:18px}
+  .gh{display:none}
+  footer{padding-left:18px;padding-right:18px}
+  h1{font-size:clamp(38px,11.5vw,52px)}
+  .lede{font-size:17px}
+  .copy,.star{width:100%;justify-content:center}
+  .picks h2{font-size:27px}.panel-head h2{font-size:29px}
+  .panel{margin-top:56px}
+  .bars,.causes{padding-left:16px;padding-right:16px}
+  .receipt{max-width:none;width:100%;transform:rotate(.6deg)}
+  .evgrid{grid-template-columns:1fr}
+  .meta div{padding-right:18px;margin-right:18px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .receipt{animation:none}
+  .ev-disc,.theme,.filters button,.copy,.star,.copy-label>span{transition:none}
+}
+:root[data-theme=dark] .logos li,:root[data-theme=dark] .causes .logos li{background:#f4f4f1}
+:root[data-theme=dark] img.logo{background:#f4f4f1;box-shadow:0 0 0 2px #f4f4f1}
+.hero-text{min-width:0}
+@media (max-width:640px){
+  .meta{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
+  .meta div{padding:12px 0 0;margin:0;border-right:0}
+  table{min-width:0}
+  thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+  tbody tr[hidden]{display:none}
+  tbody tr:last-child{border-bottom:0}
+  tbody th,tbody td,thead th:first-child,tbody th,tbody td:last-child{padding:0;border:0}
+  .c-end{grid-column:2;grid-row:1;text-align:right}
+  .c-end small{display:none}
+  .c-setup{grid-column:1/-1;font-size:14px}
+  .c-track{grid-column:1}
+  .c-runs{grid-column:2;grid-row:3;align-self:start}
+  .c-strip{display:none}
+  .foot{display:none}
+}
+@media (max-width:400px){
+  .copy,.star{padding:0 12px;font-size:14.5px;gap:9px}
+  .copy-icons{gap:6px}
+  .chip{font-size:12.5px;padding:5px 8px 5px 7px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#top">Commerce Bench</a>
+  <nav aria-label="Sections"><a href="#setups">Setups</a><a href="#stores">Stores</a><a href="#stopped">Why runs stopped</a><a href="#recordings">Recordings</a><a href="#method">Method</a></nav>
+  <div class="top-end"><button type="button" class="theme" aria-label="Switch between light and dark">Theme</button><a class="gh" href="https://github.com/anchorbrowser/commerce-bench">Open source on GitHub</a></div>
+</header>
+<main id="top">
+<section class="hero">
+  <div class="hero-text">
+    <h1>Which stores let a shopping agent check out?</h1>
+    <p class="lede">One agent, 30 real stores, one task: find the product, add it to the cart, check out as a guest, stop before payment. Only the browser changed. With the right Anchor setup the agent finished 19 stores. On a laptop browser it finished 7.</p>
+    <div class="cta">
+      <button type="button" class="copy" data-state="idle"><span class="copy-icons"><svg width="16" height="16" fill="currentColor" aria-hidden="true" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg><svg width="16" height="16" fill="currentColor" aria-hidden="true" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"/></svg><svg width="16" height="16" fill="currentColor" aria-hidden="true" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.922 16.997C23.061 18.492 18.063 22.02 12 22.02 5.937 22.02.939 18.492.078 16.997A.641.641 0 0 1 0 16.741v-2.869a.883.883 0 0 1 .053-.22c.372-.935 1.347-2.292 2.605-2.656.167-.429.414-1.055.644-1.517a10.098 10.098 0 0 1-.052-1.086c0-1.331.282-2.499 1.132-3.368.397-.406.89-.717 1.474-.952C7.255 2.937 9.248 1.98 11.978 1.98c2.731 0 4.767.957 6.166 2.093.584.235 1.077.546 1.474.952.85.869 1.132 2.037 1.132 3.368 0 .368-.014.733-.052 1.086.23.462.477 1.088.644 1.517 1.258.364 2.233 1.721 2.605 2.656a.841.841 0 0 1 .053.22v2.869a.641.641 0 0 1-.078.256Zm-11.75-5.992h-.344a4.359 4.359 0 0 1-.355.508c-.77.947-1.918 1.492-3.508 1.492-1.725 0-2.989-.359-3.782-1.259a2.137 2.137 0 0 1-.085-.104L4 11.746v6.585c1.435.779 4.514 2.179 8 2.179 3.486 0 6.565-1.4 8-2.179v-6.585l-.098-.104s-.033.045-.085.104c-.793.9-2.057 1.259-3.782 1.259-1.59 0-2.738-.545-3.508-1.492a4.359 4.359 0 0 1-.355-.508Zm2.328 3.25c.549 0 1 .451 1 1v2c0 .549-.451 1-1 1-.549 0-1-.451-1-1v-2c0-.549.451-1 1-1Zm-5 0c.549 0 1 .451 1 1v2c0 .549-.451 1-1 1-.549 0-1-.451-1-1v-2c0-.549.451-1 1-1Zm3.313-6.185c.136 1.057.403 1.913.878 2.497.442.544 1.134.938 2.344.938 1.573 0 2.292-.337 2.657-.751.384-.435.558-1.15.558-2.361 0-1.14-.243-1.847-.705-2.319-.477-.488-1.319-.862-2.824-1.025-1.487-.161-2.192.138-2.533.529-.269.307-.437.808-.438 1.578v.021c0 .265.021.562.063.893Zm-1.626 0c.042-.331.063-.628.063-.894v-.02c-.001-.77-.169-1.271-.438-1.578-.341-.391-1.046-.69-2.533-.529-1.505.163-2.347.537-2.824 1.025-.462.472-.705 1.179-.705 2.319 0 1.211.175 1.926.558 2.361.365.414 1.084.751 2.657.751 1.21 0 1.902-.394 2.344-.938.475-.584.742-1.44.878-2.497Z"/></svg><svg width="16" height="16" fill="currentColor" aria-hidden="true" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.55 5.067c-1.2038-.002-2.1806.973-2.1806 2.1765v4.8676c0 .972-.8035 1.7594-1.7597 1.7594-.568 0-1.1352-.286-1.4718-.7659l-4.9713-7.1003c-.4125-.5896-1.0837-.941-1.8103-.941-1.1334 0-2.1533.9635-2.1533 2.153v4.8957c0 .972-.7969 1.7594-1.7596 1.7594-.57 0-1.1363-.286-1.4728-.7658L.4076 5.1598C.2822 4.9798 0 5.0688 0 5.2882v4.2452c0 .2147.0656.4228.1884.599l5.4748 7.8183c.3234.462.8006.8052 1.3509.9298 1.3771.313 2.6446-.747 2.6446-2.0977v-4.893c0-.972.7875-1.7593 1.7596-1.7593h.003a1.798 1.798 0 0 1 1.4718.7658l4.9723 7.0994c.4135.5905 1.05.941 1.8093.941 1.1587 0 2.1515-.9645 2.1515-2.153v-4.8948c0-.972.7875-1.7594 1.7596-1.7594h.194a.22.22 0 0 0 .2204-.2202v-4.622a.22.22 0 0 0-.2203-.2203Z"/></svg></span><span class="copy-label"><span data-when="idle">Copy prompt for your agent</span><span data-when="done" aria-hidden="true"><svg viewBox="0 0 12 12" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Copied to clipboard</span></span></button>
+      <a class="star" href="https://github.com/anchorbrowser/commerce-bench"><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 .9l2.1 4.5 4.9.6-3.6 3.4.9 4.9L8 11.9l-4.3 2.4.9-4.9L1 6l4.9-.6z"/></svg>Star the repo<span class="star-n" hidden></span></a>
+    </div>
+    <p class="cta-note">The prompt tells your coding agent how to write an adapter, so the bench can run your own shopping agent on these stores.</p>
+    <textarea class="prompt-src" hidden readonly>First clone https://github.com/anchorbrowser/commerce-bench next to my agent's code, then run &quot;npm install&quot; and &quot;npx playwright install chromium&quot; in it.
+
+I want to test my shopping agent with Commerce Bench, the harness in this repo.
+
+My agent: &lt;where the code lives, and how it is started&gt;
+How it drives a browser: &lt;for example Playwright, Puppeteer, a CDP URL, or its own hosted browser&gt;
+
+Write an adapter that lets the harness run my agent. Work in this order.
+
+1. Read these files first. They are the contract, so follow them over anything you assume.
+   - README.md, the sections &quot;Connect your agent&quot;, &quot;What it measures&quot; and &quot;Two tracks&quot;
+   - schema/agent-task.schema.json and schema/agent-result.schema.json
+   - examples/llm-agent.ts and examples/agents/llm-claude.json, a complete working adapter
+   - agents/example-command.json and agents/example-http.json, the two agent file templates
+   - TERMS.md
+
+2. Pick the track and say which one you picked and why.
+   - &quot;observed&quot;: my agent can attach to a browser the harness gives it, through task.browser.cdp_url. Use this whenever it is possible. The harness watches that browser and grades from what it sees.
+   - &quot;reported&quot;: my agent only runs in its own browser that the harness cannot see. Then the adapter must save at least one real screenshot of the furthest page into task.evidence_dir and list it under &quot;evidence&quot; in the result. A reported run with no image does not pass.
+
+3. Write the adapter as one small program.
+   - Use the &quot;command&quot; adapter unless my agent is already an HTTP service. The task arrives as one JSON document on stdin. Print the result as the last JSON on stdout. Send logs to stderr.
+   - Pass my agent the task's goal, start_url, rules, shopper and stop_at. Use the shopper details exactly as given. They are placeholders.
+   - On the observed track, connect to task.browser.cdp_url, use the context and page that are already open, and leave the browser open when you finish.
+   - Stop before task.deadline_s runs out, and still print a result.
+   - Never add a payment card, never click a button that places an order, and do not change or remove any rule in the task. Do not edit anything under src/, tasks/ or shoppers/.
+
+4. Build the result honestly.
+   - status is &quot;completed&quot;, &quot;blocked&quot; or &quot;failed&quot;.
+   - claimed_stage is the furthest stage the agent really reached: product, cart, checkout or shipping. If you are not sure, claim the lower stage. The harness compares the claim with what the browser showed, and a claim that goes further than the evidence is graded false_completion.
+   - reported_total is the order total read from the page, with its currency. Leave it out if the agent did not read one.
+   - When the agent stops early, set failure.code to the closest of: bot_detected, captcha_required, login_required, product_not_available, add_to_cart_failed, customer_details_rejected, delivery_not_available, website_unavailable, timeout. Put a short reason in failure.message.
+   - Add steps and cost_usd if my agent can report them.
+
+5. Write the agent file as my-agent.json in the repo root, with name, track, adapter and command (or url). If the adapter needs an API key, read it from an environment variable and name that variable in &quot;notes&quot;. Never write a key into a file.
+
+6. Check your work, in this order, and show me the output of each step.
+   - npm run selftest
+     This proves the harness itself works on this machine. It does not use my agent.
+   - npm run bench -- run --agent my-agent.json --site ikea.com --runs 1 --headed
+     One store, one run, with the browser window visible.
+   - Open results/my-agent/report.html and read the row for that run. Tell me the outcome label, the furthest stage the harness saw, and whether it matches what my agent claimed.
+   If the run ends as harness_error, the adapter or the setup is broken. Fix that before anything else. Any other label is a real result, including a failure, so report it as it is and do not tune the adapter to hide it.
+
+7. If the environment variable ANCHORBROWSER_API_KEY is set, run the same store once more on an Anchor cloud browser and compare the two rows. Check only that the variable is set. Never print it or write it to a file.
+   npm run bench -- run --agent my-agent.json --browser anchor --anchor-config configs/anchor/default.json --site ikea.com --runs 1 --out results/my-agent-anchor --label my-agent@anchor
+   If it is not set, skip this step and tell me how to set it.
+
+8. Stop there. Do not start a run across all stores. Tell me the command for it and let me decide:
+   npm run bench -- run --agent my-agent.json --runs 3</textarea>
+    <span class="vh" role="status" aria-live="polite"></span>
+    <dl class="meta"><div><dt>Updated</dt><dd>25 November 2026</dd></div><div><dt>Runs</dt><dd>549</dd></div><div><dt>Stores</dt><dd>30</dd></div><div><dt>Runs per store</dt><dd>3</dd></div></dl>
+  </div>
+  <aside class="receipt" aria-label="Summary of the run, set as a till receipt">
+  <div class="r-head"><strong>Commerce Bench</strong><span>25 November 2026</span></div>
+  <div class="r-rule"></div>
+  <div class="r-line"><span>Stores visited</span><b>30</b></div>
+  <div class="r-line"><span>Shopping agents</span><b>1</b></div>
+  <div class="r-rule"></div>
+  <div class="r-line"><span><i class="sw finished"></i>Finished checkout</span><b>19</b></div><div class="r-line"><span><i class="sw agent"></i>Got in, agent stalled</span><b>4</b></div><div class="r-line"><span><i class="sw signin"></i>Store wants an account</span><b>2</b></div><div class="r-line"><span><i class="sw blocked"></i>Turned away at the door</span><b>5</b></div>
+  <div class="r-rule"></div>
+  <div class="r-line"><span>Runs recorded</span><b>549</b></div>
+  <div class="r-line"><span>Cards entered</span><b>0</b></div>
+  <div class="r-line"><span>Orders placed</span><b>0</b></div>
+  <div class="r-rule"></div>
+  <div class="r-total"><span>Finished</span><b>19 of 30</b></div>
+  <div class="r-bars" aria-hidden="true"><i style="width:2px;margin-right:1px"></i><i style="width:3px;margin-right:1px"></i><i style="width:1px;margin-right:1px"></i><i style="width:1px;margin-right:1px"></i><i style="width:2px;margin-right:2px"></i><i style="width:2px;margin-right:3px"></i><i style="width:1px;margin-right:2px"></i><i style="width:2px;margin-right:2px"></i><i style="width:3px;margin-right:3px"></i><i style="width:3px;margin-right:1px"></i><i style="width:3px;margin-right:3px"></i><i style="width:2px;margin-right:1px"></i><i style="width:2px;margin-right:1px"></i><i style="width:2px;margin-right:2px"></i><i style="width:2px;margin-right:2px"></i><i style="width:1px;margin-right:1px"></i><i style="width:3px;margin-right:3px"></i><i style="width:1px;margin-right:1px"></i><i style="width:3px;margin-right:2px"></i><i style="width:1px;margin-right:3px"></i><i style="width:3px;margin-right:1px"></i><i style="width:3px;margin-right:3px"></i><i style="width:2px;margin-right:3px"></i><i style="width:3px;margin-right:2px"></i><i style="width:2px;margin-right:1px"></i><i style="width:1px;margin-right:1px"></i><i style="width:2px;margin-right:1px"></i><i style="width:1px;margin-right:1px"></i><i style="width:2px;margin-right:3px"></i><i style="width:3px;margin-right:3px"></i><i style="width:3px;margin-right:1px"></i><i style="width:2px;margin-right:2px"></i><i style="width:1px;margin-right:1px"></i><i style="width:3px;margin-right:3px"></i><i style="width:2px;margin-right:2px"></i><i style="width:3px;margin-right:1px"></i><i style="width:1px;margin-right:1px"></i><i style="width:2px;margin-right:2px"></i><i style="width:1px;margin-right:3px"></i><i style="width:3px;margin-right:2px"></i><i style="width:3px;margin-right:3px"></i><i style="width:1px;margin-right:2px"></i><i style="width:3px;margin-right:3px"></i><i style="width:3px;margin-right:2px"></i><i style="width:3px;margin-right:2px"></i><i style="width:1px;margin-right:1px"></i></div>
+  <p class="r-foot">Nothing was bought. Every run stops before payment.</p>
+</aside>
+</section>
+
+<section class="picks" aria-label="Three findings">
+  <article><h2>10 stores finish on a default session</h2><p>No proxy, no stealth settings, nothing tuned for the store.</p><ul class="logos"><li data-tip="asos.com"><img class="logo" src="logos/asos.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">asos.com</span></li><li data-tip="barnesandnoble.com"><img class="logo" src="logos/barnesandnoble.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">barnesandnoble.com</span></li><li data-tip="bestbuy.com"><img class="logo" src="logos/bestbuy.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">bestbuy.com</span></li><li data-tip="dunelm.com"><img class="logo" src="logos/dunelm.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">dunelm.com</span></li><li data-tip="elfcosmetics.com"><img class="logo" src="logos/elfcosmetics.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">elfcosmetics.com</span></li><li data-tip="ikea.com"><img class="logo" src="logos/ikea.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">ikea.com</span></li><li data-tip="petsmart.com"><img class="logo" src="logos/petsmart.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">petsmart.com</span></li><li data-tip="quince.com"><img class="logo" src="logos/quince.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">quince.com</span></li><li data-tip="staples.com"><img class="logo" src="logos/staples.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">staples.com</span></li><li data-tip="ulta.com"><img class="logo" src="logos/ulta.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">ulta.com</span></li></ul></article>
+  <article><h2>9 more need Mac hardware</h2><p>These stores turned other sessions away or stalled them. A real Mac got through.</p><ul class="logos"><li data-tip="apple.com"><span class="logo ph" style="width:24px;height:24px" aria-hidden="true">A</span><span class="vh">apple.com</span></li><li data-tip="carters.com"><img class="logo" src="logos/carters.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">carters.com</span></li><li data-tip="homedepot.com"><img class="logo" src="logos/homedepot.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">homedepot.com</span></li><li data-tip="hp.com"><img class="logo" src="logos/hp.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">hp.com</span></li><li data-tip="lego.com"><img class="logo" src="logos/lego.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">lego.com</span></li><li data-tip="lululemon.com"><img class="logo" src="logos/lululemon.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">lululemon.com</span></li><li data-tip="nike.com"><img class="logo" src="logos/nike.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">nike.com</span></li><li data-tip="sephora.com"><img class="logo" src="logos/sephora.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">sephora.com</span></li><li data-tip="uniqlo.com"><img class="logo" src="logos/uniqlo.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">uniqlo.com</span></li></ul></article>
+  <article><h2>5 stayed shut on every setup</h2><p>A bot wall or an error page ended most runs, whichever browser was used.</p><ul class="logos"><li data-tip="ebay.com"><span class="logo ph" style="width:24px;height:24px" aria-hidden="true">E</span><span class="vh">ebay.com</span></li><li data-tip="michaels.com"><img class="logo" src="logos/michaels.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">michaels.com</span></li><li data-tip="smythstoys.com"><img class="logo" src="logos/smythstoys.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">smythstoys.com</span></li><li data-tip="target.com"><img class="logo" src="logos/target.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">target.com</span></li><li data-tip="wayfair.com"><img class="logo" src="logos/wayfair.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">wayfair.com</span></li></ul></article>
+</section>
+
+<section id="setups" class="panel">
+  <div class="panel-head"><h2>Same agent, four browsers</h2><p>Each bar is 30 stores. A store counts as finished when more than half of its graded runs pass.</p></div>
+  <ul class="legend"><li><i class="sw finished"></i>Finished checkout</li><li><i class="sw agent"></i>Got in, agent stalled</li><li><i class="sw signin"></i>Store wants an account</li><li><i class="sw blocked"></i>Turned away at the door</li></ul><div class="bars"><div class="bar-row lead"><div class="bar-name">Anchor, best setup per store</div><div class="bar" role="img" aria-label="Finished checkout 19, Got in, agent stalled 4, Store wants an account 2, Turned away at the door 5"><span class="seg finished" style="flex:19" tabindex="0" data-tip="Finished checkout: 19" data-list="apple.com, asos.com, barnesandnoble.com, bestbuy.com, carters.com, dunelm.com, elfcosmetics.com, homedepot.com, hp.com, ikea.com, lego.com, lululemon.com, nike.com, petsmart.com, quince.com, sephora.com, staples.com, ulta.com, uniqlo.com"><b>19</b></span><span class="seg agent" style="flex:4" tabindex="0" data-tip="Got in, agent stalled: 4" data-list="autozone.com, diy.com, lookfantastic.com, microcenter.com"><b>4</b></span><span class="seg signin" style="flex:2" tabindex="0" data-tip="Store wants an account: 2" data-list="amazon.com, walmart.com"><b>2</b></span><span class="seg blocked" style="flex:5" tabindex="0" data-tip="Turned away at the door: 5" data-list="ebay.com, michaels.com, smythstoys.com, target.com, wayfair.com"><b>5</b></span></div></div><div class="bar-row"><div class="bar-name">Anchor on Mac hardware</div><div class="bar" role="img" aria-label="Finished checkout 17, Got in, agent stalled 7, Store wants an account 1, Turned away at the door 5"><span class="seg finished" style="flex:17" tabindex="0" data-tip="Finished checkout: 17" data-list="apple.com, barnesandnoble.com, bestbuy.com, carters.com, dunelm.com, elfcosmetics.com, homedepot.com, hp.com, ikea.com, lego.com, lululemon.com, nike.com, quince.com, sephora.com, staples.com, ulta.com, uniqlo.com"><b>17</b></span><span class="seg agent" style="flex:7" tabindex="0" data-tip="Got in, agent stalled: 7" data-list="asos.com, autozone.com, diy.com, lookfantastic.com, michaels.com, microcenter.com, petsmart.com"><b>7</b></span><span class="seg signin" style="flex:1" tabindex="0" data-tip="Store wants an account: 1" data-list="amazon.com"><b>1</b></span><span class="seg blocked" style="flex:5" tabindex="0" data-tip="Turned away at the door: 5" data-list="ebay.com, smythstoys.com, target.com, walmart.com, wayfair.com"><b>5</b></span></div></div><div class="bar-row"><div class="bar-name">Anchor, default session</div><div class="bar" role="img" aria-label="Finished checkout 14, Got in, agent stalled 2, Store wants an account 1, Turned away at the door 13"><span class="seg finished" style="flex:14" tabindex="0" data-tip="Finished checkout: 14" data-list="apple.com, asos.com, barnesandnoble.com, bestbuy.com, dunelm.com, elfcosmetics.com, hp.com, ikea.com, lego.com, nike.com, petsmart.com, quince.com, staples.com, ulta.com"><b>14</b></span><span class="seg agent" style="flex:2" tabindex="0" data-tip="Got in, agent stalled: 2" data-list="diy.com, lookfantastic.com"><b>2</b></span><span class="seg signin" style="flex:1" tabindex="0" data-tip="Store wants an account: 1" data-list="amazon.com"><b>1</b></span><span class="seg blocked" style="flex:13" tabindex="0" data-tip="Turned away at the door: 13" data-list="autozone.com, carters.com, ebay.com, homedepot.com, lululemon.com, michaels.com, microcenter.com, sephora.com, smythstoys.com, target.com, uniqlo.com, walmart.com, wayfair.com"><b>13</b></span></div></div><div class="bar-row"><div class="bar-name">Chromium on a laptop</div><div class="bar" role="img" aria-label="Finished checkout 7, Got in, agent stalled 4, Store wants an account 1, Turned away at the door 18"><span class="seg finished" style="flex:7" tabindex="0" data-tip="Finished checkout: 7" data-list="barnesandnoble.com, bestbuy.com, dunelm.com, elfcosmetics.com, ikea.com, quince.com, ulta.com"><b>7</b></span><span class="seg agent" style="flex:4" tabindex="0" data-tip="Got in, agent stalled: 4" data-list="apple.com, lookfantastic.com, nike.com, petsmart.com"><b>4</b></span><span class="seg signin" style="flex:1" tabindex="0" data-tip="Store wants an account: 1" data-list="amazon.com"><b>1</b></span><span class="seg blocked" style="flex:18" tabindex="0" data-tip="Turned away at the door: 18" data-list="asos.com, autozone.com, carters.com, diy.com, ebay.com, homedepot.com, hp.com, lego.com, lululemon.com, michaels.com, microcenter.com, sephora.com, smythstoys.com, staples.com, target.com, uniqlo.com, walmart.com, wayfair.com"><b>18</b></span></div></div></div>
+</section>
+
+<section id="stores" class="panel">
+  <div class="panel-head"><h2>Store by store</h2><p>Each row shows the Anchor setup that did best for that store, how far along the checkout the agent got, and its three runs.</p></div>
+  <div class="filters" role="group" aria-label="Filter stores by result"><button type="button" data-tag="all" aria-pressed="true">All stores<span>30</span></button><button type="button" data-tag="finished" aria-pressed="false">Finished<span>19</span></button><button type="button" data-tag="agent" aria-pressed="false">Agent stalled<span>4</span></button><button type="button" data-tag="signin" aria-pressed="false">Needs an account<span>2</span></button><button type="button" data-tag="blocked" aria-pressed="false">Turned away<span>5</span></button></div>
+  <div class="scroll"><table>
+    <thead><tr><th scope="col">Store</th><th scope="col">Best setup</th><th scope="col">Checkout progress</th><th scope="col">Runs</th><th scope="col"><span class="strip-head"><abbr title="Laptop">L</abbr><abbr title="Default session">D</abbr><abbr title="Mac hardware">M</abbr><abbr title="Proxy with extra stealth">S</abbr><abbr title="Residential proxy">R</abbr></span></th><th scope="col">Result</th></tr></thead>
+    <tbody>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><span class="logo ph" style="width:20px;height:20px" aria-hidden="true">A</span><span><strong>apple.com</strong><small>electronics</small></span></span></th>
+  <td class="c-setup">Mac hardware</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: payment page"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="done" data-tip="Payment page: reached"></i></div><span class="where">Furthest: payment page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">3/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell agent" data-tip="Laptop: agent stalled, 0 of 2 passed"></i><i class="cell finished" data-tip="Default: finished, 2 of 2 passed"></i><i class="cell finished" data-tip="Mac: finished, 3 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>3 of 3 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/barnesandnoble.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>barnesandnoble.com</strong><small>books</small></span></span></th>
+  <td class="c-setup">Default session</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: payment page"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="done" data-tip="Payment page: reached"></i></div><span class="where">Furthest: payment page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">3/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell finished" data-tip="Laptop: finished, 3 of 3 passed"></i><i class="cell finished" data-tip="Default: finished, 3 of 3 passed"></i><i class="cell finished" data-tip="Mac: finished, 3 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>3 of 3 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/dunelm.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>dunelm.com</strong><small>home</small></span></span></th>
+  <td class="c-setup">Default session</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: payment page"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="done" data-tip="Payment page: reached"></i></div><span class="where">Furthest: payment page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">3/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell finished" data-tip="Laptop: finished, 3 of 3 passed"></i><i class="cell finished" data-tip="Default: finished, 3 of 3 passed"></i><i class="cell finished" data-tip="Mac: finished, 3 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>3 of 3 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/elfcosmetics.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>elfcosmetics.com</strong><small>beauty</small></span></span></th>
+  <td class="c-setup">Default session</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: payment page"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="done" data-tip="Payment page: reached"></i></div><span class="where">Furthest: payment page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">3/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell finished" data-tip="Laptop: finished, 3 of 3 passed"></i><i class="cell finished" data-tip="Default: finished, 3 of 3 passed"></i><i class="cell finished" data-tip="Mac: finished, 3 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>3 of 3 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/homedepot.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>homedepot.com</strong><small>home</small></span></span></th>
+  <td class="c-setup">Mac hardware</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: payment page"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="done" data-tip="Payment page: reached"></i></div><span class="where">Furthest: payment page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">3/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Default: turned away, 0 of 3 passed"></i><i class="cell finished" data-tip="Mac: finished, 3 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>3 of 3 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/hp.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>hp.com</strong><small>electronics</small></span></span></th>
+  <td class="c-setup">Mac hardware</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: payment page"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="done" data-tip="Payment page: reached"></i></div><span class="where">Furthest: payment page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">3/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell finished" data-tip="Default: finished, 2 of 2 passed"></i><i class="cell finished" data-tip="Mac: finished, 3 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>3 of 3 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/lululemon.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>lululemon.com</strong><small>fashion</small></span></span></th>
+  <td class="c-setup">Mac hardware</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: payment page"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="done" data-tip="Payment page: reached"></i></div><span class="where">Furthest: payment page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">3/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Default: turned away, 0 of 3 passed"></i><i class="cell finished" data-tip="Mac: finished, 3 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>3 of 3 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/petsmart.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>petsmart.com</strong><small>pets</small></span></span></th>
+  <td class="c-setup">Default session</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: payment page"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="done" data-tip="Payment page: reached"></i></div><span class="where">Furthest: payment page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">3/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell agent" data-tip="Laptop: agent stalled, 0 of 3 passed"></i><i class="cell finished" data-tip="Default: finished, 3 of 3 passed"></i><i class="cell agent" data-tip="Mac: agent stalled, 1 of 3 passed"></i><i class="cell finished" data-tip="Stealth: finished, 2 of 2 passed"></i><i class="cell finished" data-tip="Residential: finished, 3 of 3 passed"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>3 of 3 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/quince.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>quince.com</strong><small>fashion</small></span></span></th>
+  <td class="c-setup">Default session</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: payment page"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="done" data-tip="Payment page: reached"></i></div><span class="where">Furthest: payment page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">3/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell finished" data-tip="Laptop: finished, 3 of 3 passed"></i><i class="cell finished" data-tip="Default: finished, 3 of 3 passed"></i><i class="cell finished" data-tip="Mac: finished, 2 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>3 of 3 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/sephora.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>sephora.com</strong><small>beauty</small></span></span></th>
+  <td class="c-setup">Mac hardware</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: payment page"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="done" data-tip="Payment page: reached"></i></div><span class="where">Furthest: payment page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">3/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Default: turned away, 0 of 3 passed"></i><i class="cell finished" data-tip="Mac: finished, 3 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>3 of 3 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/ulta.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>ulta.com</strong><small>beauty</small></span></span></th>
+  <td class="c-setup">Default session</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: payment page"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="done" data-tip="Payment page: reached"></i></div><span class="where">Furthest: payment page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">3/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell finished" data-tip="Laptop: finished, 3 of 3 passed"></i><i class="cell finished" data-tip="Default: finished, 3 of 3 passed"></i><i class="cell finished" data-tip="Mac: finished, 2 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>3 of 3 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/uniqlo.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>uniqlo.com</strong><small>fashion</small></span></span></th>
+  <td class="c-setup">Mac hardware</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: payment page"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="done" data-tip="Payment page: reached"></i></div><span class="where">Furthest: payment page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">3/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Default: turned away, 0 of 3 passed"></i><i class="cell finished" data-tip="Mac: finished, 3 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>3 of 3 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/bestbuy.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>bestbuy.com</strong><small>marketplace</small></span></span></th>
+  <td class="c-setup">Default session</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: shipping"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="off" data-tip="Payment page: not reached"></i></div><span class="where">Furthest: shipping</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">3/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell finished" data-tip="Laptop: finished, 2 of 3 passed"></i><i class="cell finished" data-tip="Default: finished, 3 of 3 passed"></i><i class="cell finished" data-tip="Mac: finished, 2 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>3 of 3 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/lego.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>lego.com</strong><small>toys</small></span></span></th>
+  <td class="c-setup">Mac hardware</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: shipping"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="off" data-tip="Payment page: not reached"></i></div><span class="where">Furthest: shipping</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">3/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell finished" data-tip="Default: finished, 2 of 3 passed"></i><i class="cell finished" data-tip="Mac: finished, 3 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>3 of 3 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/staples.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>staples.com</strong><small>office</small></span></span></th>
+  <td class="c-setup">Default session</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: shipping"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="off" data-tip="Payment page: not reached"></i></div><span class="where">Furthest: shipping</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">3/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell finished" data-tip="Default: finished, 3 of 3 passed"></i><i class="cell finished" data-tip="Mac: finished, 3 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>3 of 3 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/carters.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>carters.com</strong><small>baby</small></span></span></th>
+  <td class="c-setup">Mac hardware</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: payment page"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="done" data-tip="Payment page: reached"></i></div><span class="where">Furthest: payment page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot void" data-tip="Run 2: browser stopped answering, not graded"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">2/2</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Default: turned away, 0 of 3 passed"></i><i class="cell finished" data-tip="Mac: finished, 2 of 2 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>2 of 2 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/ikea.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>ikea.com</strong><small>home</small></span></span></th>
+  <td class="c-setup">Default session</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: payment page"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="done" data-tip="Payment page: reached"></i></div><span class="where">Furthest: payment page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot void" data-tip="Run 3: browser stopped answering, not graded"></i></span><span class="num">2/2</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell finished" data-tip="Laptop: finished, 3 of 3 passed"></i><i class="cell finished" data-tip="Default: finished, 2 of 2 passed"></i><i class="cell finished" data-tip="Mac: finished, 2 of 2 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>2 of 2 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/asos.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>asos.com</strong><small>fashion</small></span></span></th>
+  <td class="c-setup">Default session</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: shipping"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="off" data-tip="Payment page: not reached"></i></div><span class="where">Furthest: shipping</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot void" data-tip="Run 1: browser stopped answering, not graded"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot pass" data-tip="Run 3: passed"></i></span><span class="num">2/2</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell finished" data-tip="Default: finished, 2 of 2 passed"></i><i class="cell agent" data-tip="Mac: agent stalled, 1 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>2 of 2 runs passed</small></td>
+</tr>
+<tr data-ending="finished">
+  <th scope="row"><span class="store"><img class="logo" src="logos/nike.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>nike.com</strong><small>fashion</small></span></span></th>
+  <td class="c-setup">Mac hardware</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: shipping"><i class="done" data-tip="Product: reached"></i><i class="done" data-tip="Cart: reached"></i><i class="done" data-tip="Checkout: reached"></i><i class="done" data-tip="Shipping: reached"></i><i class="off" data-tip="Payment page: not reached"></i></div><span class="where">Furthest: shipping</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot fail" data-tip="Run 3: stalled at checkout"></i></span><span class="num">2/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell agent" data-tip="Laptop: agent stalled, 0 of 3 passed"></i><i class="cell finished" data-tip="Default: finished, 1 of 1 passed"></i><i class="cell finished" data-tip="Mac: finished, 2 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span><small>2 of 3 runs passed</small></td>
+</tr>
+<tr data-ending="agent">
+  <th scope="row"><span class="store"><img class="logo" src="logos/diy.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>diy.com</strong><small>home</small></span></span></th>
+  <td class="c-setup">Default session</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: payment page"><i class="part" data-tip="Product: reached"></i><i class="part" data-tip="Cart: reached"></i><i class="part" data-tip="Checkout: reached"></i><i class="part" data-tip="Shipping: reached"></i><i class="part" data-tip="Payment page: reached"></i></div><span class="where">Furthest: payment page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot fail" data-tip="Run 1: stalled at checkout"></i><i class="dot pass" data-tip="Run 2: passed"></i><i class="dot fail" data-tip="Run 3: stalled at cart"></i></span><span class="num">1/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell agent" data-tip="Default: agent stalled, 1 of 3 passed"></i><i class="cell agent" data-tip="Mac: agent stalled, 0 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip agent"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.2 3v6M7.8 3v6"/></svg>Agent stalled</span><small>Stalled at checkout</small></td>
+</tr>
+<tr data-ending="agent">
+  <th scope="row"><span class="store"><img class="logo" src="logos/lookfantastic.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>lookfantastic.com</strong><small>beauty</small></span></span></th>
+  <td class="c-setup">Default session</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: payment page"><i class="part" data-tip="Product: reached"></i><i class="part" data-tip="Cart: reached"></i><i class="part" data-tip="Checkout: reached"></i><i class="part" data-tip="Shipping: reached"></i><i class="part" data-tip="Payment page: reached"></i></div><span class="where">Furthest: payment page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot pass" data-tip="Run 1: passed"></i><i class="dot fail" data-tip="Run 2: stalled at checkout"></i><i class="dot fail" data-tip="Run 3: stalled at checkout"></i></span><span class="num">1/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell agent" data-tip="Laptop: agent stalled, 0 of 3 passed"></i><i class="cell agent" data-tip="Default: agent stalled, 1 of 3 passed"></i><i class="cell agent" data-tip="Mac: agent stalled, 0 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip agent"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.2 3v6M7.8 3v6"/></svg>Agent stalled</span><small>Stalled at checkout</small></td>
+</tr>
+<tr data-ending="agent">
+  <th scope="row"><span class="store"><img class="logo" src="logos/autozone.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>autozone.com</strong><small>home</small></span></span></th>
+  <td class="c-setup">Mac hardware</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: checkout"><i class="part" data-tip="Product: reached"></i><i class="part" data-tip="Cart: reached"></i><i class="part" data-tip="Checkout: reached"></i><i class="off" data-tip="Shipping: not reached"></i><i class="off" data-tip="Payment page: not reached"></i></div><span class="where">Furthest: checkout</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot fail" data-tip="Run 1: stopped by DataDome"></i><i class="dot fail" data-tip="Run 2: stalled at checkout"></i><i class="dot fail" data-tip="Run 3: stalled at the start page"></i></span><span class="num">0/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Default: turned away, 0 of 3 passed"></i><i class="cell agent" data-tip="Mac: agent stalled, 0 of 3 passed"></i><i class="cell blocked" data-tip="Stealth: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Residential: turned away, 0 of 2 passed"></i></span></td>
+  <td class="c-end"><span class="chip agent"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.2 3v6M7.8 3v6"/></svg>Agent stalled</span><small>Stalled at checkout</small></td>
+</tr>
+<tr data-ending="agent">
+  <th scope="row"><span class="store"><img class="logo" src="logos/microcenter.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>microcenter.com</strong><small>electronics</small></span></span></th>
+  <td class="c-setup">Proxy with extra stealth</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: checkout"><i class="part" data-tip="Product: reached"></i><i class="part" data-tip="Cart: reached"></i><i class="part" data-tip="Checkout: reached"></i><i class="off" data-tip="Shipping: not reached"></i><i class="off" data-tip="Payment page: not reached"></i></div><span class="where">Furthest: checkout</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot fail" data-tip="Run 1: stalled at checkout"></i><i class="dot fail" data-tip="Run 2: stalled at checkout"></i><i class="dot fail" data-tip="Run 3: stalled at checkout"></i></span><span class="num">0/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Default: turned away, 0 of 3 passed"></i><i class="cell agent" data-tip="Mac: agent stalled, 0 of 3 passed"></i><i class="cell agent" data-tip="Stealth: agent stalled, 0 of 3 passed"></i><i class="cell agent" data-tip="Residential: agent stalled, 0 of 3 passed"></i></span></td>
+  <td class="c-end"><span class="chip agent"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.2 3v6M7.8 3v6"/></svg>Agent stalled</span><small>Stalled at checkout</small></td>
+</tr>
+<tr data-ending="signin">
+  <th scope="row"><span class="store"><img class="logo" src="logos/amazon.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>amazon.com</strong><small>marketplace</small></span></span></th>
+  <td class="c-setup">Default session</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: cart"><i class="part" data-tip="Product: reached"></i><i class="part" data-tip="Cart: reached"></i><i class="off" data-tip="Checkout: not reached"></i><i class="off" data-tip="Shipping: not reached"></i><i class="off" data-tip="Payment page: not reached"></i></div><span class="where">Furthest: cart</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot fail" data-tip="Run 1: sign-in required"></i><i class="dot fail" data-tip="Run 2: sign-in required"></i><i class="dot fail" data-tip="Run 3: stalled at the start page"></i></span><span class="num">0/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell signin" data-tip="Laptop: needs an account, 0 of 3 passed"></i><i class="cell signin" data-tip="Default: needs an account, 0 of 3 passed"></i><i class="cell signin" data-tip="Mac: needs an account, 0 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip signin"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="4.3" r="1.9"/><path d="M2.6 10c.4-1.9 1.7-2.9 3.4-2.9s3 1 3.4 2.9"/></svg>Needs an account</span><small>Sign-in required</small></td>
+</tr>
+<tr data-ending="signin">
+  <th scope="row"><span class="store"><img class="logo" src="logos/walmart.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>walmart.com</strong><small>marketplace</small></span></span></th>
+  <td class="c-setup">Proxy with extra stealth</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: cart"><i class="part" data-tip="Product: reached"></i><i class="part" data-tip="Cart: reached"></i><i class="off" data-tip="Checkout: not reached"></i><i class="off" data-tip="Shipping: not reached"></i><i class="off" data-tip="Payment page: not reached"></i></div><span class="where">Furthest: cart</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot fail" data-tip="Run 1: sign-in required"></i><i class="dot fail" data-tip="Run 2: stalled at cart"></i><i class="dot fail" data-tip="Run 3: sign-in required"></i></span><span class="num">0/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Default: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Mac: turned away, 0 of 3 passed"></i><i class="cell signin" data-tip="Stealth: needs an account, 0 of 3 passed"></i><i class="cell signin" data-tip="Residential: needs an account, 0 of 3 passed"></i></span></td>
+  <td class="c-end"><span class="chip signin"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="4.3" r="1.9"/><path d="M2.6 10c.4-1.9 1.7-2.9 3.4-2.9s3 1 3.4 2.9"/></svg>Needs an account</span><small>Sign-in required</small></td>
+</tr>
+<tr data-ending="blocked">
+  <th scope="row"><span class="store"><img class="logo" src="logos/michaels.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>michaels.com</strong><small>toys</small></span></span></th>
+  <td class="c-setup">Residential proxy</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: checkout"><i class="part" data-tip="Product: reached"></i><i class="part" data-tip="Cart: reached"></i><i class="part" data-tip="Checkout: reached"></i><i class="off" data-tip="Shipping: not reached"></i><i class="off" data-tip="Payment page: not reached"></i></div><span class="where">Furthest: checkout</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot fail" data-tip="Run 1: stopped by an edge block"></i><i class="dot fail" data-tip="Run 2: stalled at checkout"></i><i class="dot fail" data-tip="Run 3: stopped by an edge block"></i></span><span class="num">0/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Default: turned away, 0 of 3 passed"></i><i class="cell agent" data-tip="Mac: agent stalled, 0 of 3 passed"></i><i class="cell blocked" data-tip="Stealth: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Residential: turned away, 0 of 3 passed"></i></span></td>
+  <td class="c-end"><span class="chip blocked"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 3.2l5.6 5.6M8.8 3.2 3.2 8.8"/></svg>Turned away</span><small>Stopped by an edge block</small></td>
+</tr>
+<tr data-ending="blocked">
+  <th scope="row"><span class="store"><img class="logo" src="logos/target.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>target.com</strong><small>marketplace</small></span></span></th>
+  <td class="c-setup">Proxy with extra stealth</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Furthest: product"><i class="part" data-tip="Product: reached"></i><i class="off" data-tip="Cart: not reached"></i><i class="off" data-tip="Checkout: not reached"></i><i class="off" data-tip="Shipping: not reached"></i><i class="off" data-tip="Payment page: not reached"></i></div><span class="where">Furthest: product</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot fail" data-tip="Run 1: stopped by PerimeterX"></i><i class="dot fail" data-tip="Run 2: stopped by PerimeterX"></i><i class="dot fail" data-tip="Run 3: stopped by PerimeterX"></i></span><span class="num">0/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Default: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Mac: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Stealth: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Residential: turned away, 0 of 3 passed"></i></span></td>
+  <td class="c-end"><span class="chip blocked"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 3.2l5.6 5.6M8.8 3.2 3.2 8.8"/></svg>Turned away</span><small>Stopped by PerimeterX</small></td>
+</tr>
+<tr data-ending="blocked">
+  <th scope="row"><span class="store"><span class="logo ph" style="width:20px;height:20px" aria-hidden="true">E</span><span><strong>ebay.com</strong><small>marketplace</small></span></span></th>
+  <td class="c-setup">Default session</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Did not get past the start page"><i class="shut" data-tip="Product: not reached"></i><i class="off" data-tip="Cart: not reached"></i><i class="off" data-tip="Checkout: not reached"></i><i class="off" data-tip="Shipping: not reached"></i><i class="off" data-tip="Payment page: not reached"></i></div><span class="where">Did not get past the start page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot fail" data-tip="Run 1: store served an error page"></i><i class="dot fail" data-tip="Run 2: store served an error page"></i><i class="dot fail" data-tip="Run 3: store served an error page"></i></span><span class="num">0/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Default: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Mac: turned away, 0 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip blocked"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 3.2l5.6 5.6M8.8 3.2 3.2 8.8"/></svg>Turned away</span><small>Store served an error page</small></td>
+</tr>
+<tr data-ending="blocked">
+  <th scope="row"><span class="store"><img class="logo" src="logos/smythstoys.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>smythstoys.com</strong><small>toys</small></span></span></th>
+  <td class="c-setup">Default session</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Did not get past the start page"><i class="shut" data-tip="Product: not reached"></i><i class="off" data-tip="Cart: not reached"></i><i class="off" data-tip="Checkout: not reached"></i><i class="off" data-tip="Shipping: not reached"></i><i class="off" data-tip="Payment page: not reached"></i></div><span class="where">Did not get past the start page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot fail" data-tip="Run 1: stopped by Imperva"></i><i class="dot fail" data-tip="Run 2: stopped by Imperva"></i><i class="dot fail" data-tip="Run 3: stopped by Imperva"></i></span><span class="num">0/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Default: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Mac: turned away, 0 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell none" data-tip="Residential: not run"></i></span></td>
+  <td class="c-end"><span class="chip blocked"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 3.2l5.6 5.6M8.8 3.2 3.2 8.8"/></svg>Turned away</span><small>Stopped by Imperva</small></td>
+</tr>
+<tr data-ending="blocked">
+  <th scope="row"><span class="store"><img class="logo" src="logos/wayfair.com.png" alt="" width="20" height="20" loading="lazy"><span><strong>wayfair.com</strong><small>home</small></span></span></th>
+  <td class="c-setup">Default session</td>
+  <td class="c-track"><div class="track" role="img" aria-label="Did not get past the start page"><i class="shut" data-tip="Product: not reached"></i><i class="off" data-tip="Cart: not reached"></i><i class="off" data-tip="Checkout: not reached"></i><i class="off" data-tip="Shipping: not reached"></i><i class="off" data-tip="Payment page: not reached"></i></div><span class="where">Did not get past the start page</span></td>
+  <td class="c-runs"><span class="dots"><i class="dot fail" data-tip="Run 1: stopped by PerimeterX"></i><i class="dot fail" data-tip="Run 2: stopped by PerimeterX"></i><i class="dot fail" data-tip="Run 3: stopped by PerimeterX"></i></span><span class="num">0/3</span></td>
+  <td class="c-strip"><span class="strip"><i class="cell blocked" data-tip="Laptop: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Default: turned away, 0 of 3 passed"></i><i class="cell blocked" data-tip="Mac: turned away, 0 of 3 passed"></i><i class="cell none" data-tip="Stealth: not run"></i><i class="cell blocked" data-tip="Residential: turned away, 0 of 3 passed"></i></span></td>
+  <td class="c-end"><span class="chip blocked"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 3.2l5.6 5.6M8.8 3.2 3.2 8.8"/></svg>Turned away</span><small>Stopped by PerimeterX</small></td>
+</tr>
+    </tbody>
+  </table></div>
+  <p class="foot">The five squares compare setups for the same store: laptop, default session, Mac hardware, proxy with extra stealth, residential proxy. An empty square means that setup was not run there.</p>
+</section>
+
+<section id="stopped" class="panel">
+  <div class="panel-head"><h2>Why runs stopped</h2><p>The 11 stores that did not finish, grouped by what ended most of their runs on the best setup.</p></div>
+  <ul class="causes"><li><div class="cause"><strong>Stalled at checkout</strong><span class="who agent">Agent can fix</span></div><span class="cause-n">4<small>stores</small></span><ul class="logos"><li data-tip="autozone.com"><img class="logo" src="logos/autozone.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">autozone.com</span></li><li data-tip="diy.com"><img class="logo" src="logos/diy.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">diy.com</span></li><li data-tip="lookfantastic.com"><img class="logo" src="logos/lookfantastic.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">lookfantastic.com</span></li><li data-tip="microcenter.com"><img class="logo" src="logos/microcenter.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">microcenter.com</span></li></ul><p class="cause-why">The browser got past the front door and the agent reached the cart or the checkout. It then did not get the form accepted, or used up its steps. A stronger shopping agent can finish here with no change to the browser.</p></li><li><div class="cause"><strong>Sign-in required</strong><span class="who signin">Needs a signed-in run</span></div><span class="cause-n">2<small>stores</small></span><ul class="logos"><li data-tip="amazon.com"><img class="logo" src="logos/amazon.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">amazon.com</span></li><li data-tip="walmart.com"><img class="logo" src="logos/walmart.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">walmart.com</span></li></ul><p class="cause-why">The store has no guest checkout. The agent built the cart, then checkout asked for an account. The task says guest only, so the run stops there. This is the store’s rule, not a block.</p></li><li><div class="cause"><strong>Stopped by PerimeterX</strong><span class="who blocked">Browser has to get in</span></div><span class="cause-n">2<small>stores</small></span><ul class="logos"><li data-tip="target.com"><img class="logo" src="logos/target.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">target.com</span></li><li data-tip="wayfair.com"><img class="logo" src="logos/wayfair.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">wayfair.com</span></li></ul><p class="cause-why">PerimeterX is a bot-detection service. It challenged the browser before the agent could reach a product, so nothing the agent does changes the result.</p></li><li><div class="cause"><strong>Stopped by an edge block</strong><span class="who blocked">Browser has to get in</span></div><span class="cause-n">1<small>store</small></span><ul class="logos"><li data-tip="michaels.com"><img class="logo" src="logos/michaels.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">michaels.com</span></li></ul><p class="cause-why">The store’s network edge refused the request before any page loaded. The agent never had a page to act on.</p></li><li><div class="cause"><strong>Stopped by Imperva</strong><span class="who blocked">Browser has to get in</span></div><span class="cause-n">1<small>store</small></span><ul class="logos"><li data-tip="smythstoys.com"><img class="logo" src="logos/smythstoys.com.png" alt="" width="24" height="24" loading="lazy"><span class="vh">smythstoys.com</span></li></ul><p class="cause-why">Imperva is a bot-detection service. It challenged the browser before the agent could reach a product, so nothing the agent does changes the result.</p></li><li><div class="cause"><strong>Store served an error page</strong><span class="who agent">Cause not known yet</span></div><span class="cause-n">1<small>store</small></span><ul class="logos"><li data-tip="ebay.com"><span class="logo ph" style="width:24px;height:24px" aria-hidden="true">E</span><span class="vh">ebay.com</span></li></ul><p class="cause-why">The store answered with its own error page instead of the storefront, on every setup tried. It may be a block that looks like an outage, or a store fault.</p></li></ul>
+</section>
+
+<section id="recordings" class="panel">
+  <div class="panel-head"><h2>Watch the runs</h2><p>21 session recordings from Anchor, one passing run per store, full length and unedited. Hover to preview, click to play from the start. Shopper details are placeholders.</p></div>
+  <div class="evgrid">
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/apple-anchor-mac.mp4#t=119"></video>
+    <button type="button" class="ev-play" aria-label="Play the apple.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">2:18</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><span class="logo ph" style="width:20px;height:20px" aria-hidden="true">A</span><strong>apple.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Mac hardware, 3 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/barnesandnoble-anchor-default.mp4#t=72"></video>
+    <button type="button" class="ev-play" aria-label="Play the barnesandnoble.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">1:24</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/barnesandnoble.com.png" alt="" width="20" height="20" loading="lazy"><strong>barnesandnoble.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Default session, 3 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/dunelm-anchor-default.mp4#t=114"></video>
+    <button type="button" class="ev-play" aria-label="Play the dunelm.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">2:13</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/dunelm.com.png" alt="" width="20" height="20" loading="lazy"><strong>dunelm.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Default session, 3 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/elfcosmetics-anchor-default.mp4#t=151"></video>
+    <button type="button" class="ev-play" aria-label="Play the elfcosmetics.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">2:55</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/elfcosmetics.com.png" alt="" width="20" height="20" loading="lazy"><strong>elfcosmetics.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Default session, 3 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/homedepot-anchor-mac.mp4#t=138"></video>
+    <button type="button" class="ev-play" aria-label="Play the homedepot.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">2:40</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/homedepot.com.png" alt="" width="20" height="20" loading="lazy"><strong>homedepot.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Mac hardware, 3 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/hp-anchor-mac.mp4#t=158"></video>
+    <button type="button" class="ev-play" aria-label="Play the hp.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">3:04</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/hp.com.png" alt="" width="20" height="20" loading="lazy"><strong>hp.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Mac hardware, 3 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/lululemon-anchor-mac.mp4#t=169"></video>
+    <button type="button" class="ev-play" aria-label="Play the lululemon.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">3:16</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/lululemon.com.png" alt="" width="20" height="20" loading="lazy"><strong>lululemon.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Mac hardware, 3 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/petsmart-anchor-default.mp4#t=88"></video>
+    <button type="button" class="ev-play" aria-label="Play the petsmart.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">1:42</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/petsmart.com.png" alt="" width="20" height="20" loading="lazy"><strong>petsmart.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Default session, 3 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/quince-anchor-default.mp4#t=112"></video>
+    <button type="button" class="ev-play" aria-label="Play the quince.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">2:10</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/quince.com.png" alt="" width="20" height="20" loading="lazy"><strong>quince.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Default session, 3 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/sephora-anchor-mac.mp4#t=120"></video>
+    <button type="button" class="ev-play" aria-label="Play the sephora.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">2:20</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/sephora.com.png" alt="" width="20" height="20" loading="lazy"><strong>sephora.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Mac hardware, 3 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/ulta-anchor-default.mp4#t=132"></video>
+    <button type="button" class="ev-play" aria-label="Play the ulta.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">2:33</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/ulta.com.png" alt="" width="20" height="20" loading="lazy"><strong>ulta.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Default session, 3 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/uniqlo-anchor-mac.mp4#t=162"></video>
+    <button type="button" class="ev-play" aria-label="Play the uniqlo.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">3:08</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/uniqlo.com.png" alt="" width="20" height="20" loading="lazy"><strong>uniqlo.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Mac hardware, 3 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/bestbuy-anchor-default.mp4#t=76"></video>
+    <button type="button" class="ev-play" aria-label="Play the bestbuy.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">1:28</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/bestbuy.com.png" alt="" width="20" height="20" loading="lazy"><strong>bestbuy.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Default session, 3 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/lego-anchor-mac.mp4#t=125"></video>
+    <button type="button" class="ev-play" aria-label="Play the lego.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">2:25</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/lego.com.png" alt="" width="20" height="20" loading="lazy"><strong>lego.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Mac hardware, 3 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/staples-anchor-default.mp4#t=82"></video>
+    <button type="button" class="ev-play" aria-label="Play the staples.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">1:35</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/staples.com.png" alt="" width="20" height="20" loading="lazy"><strong>staples.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Default session, 3 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/carters-anchor-mac.mp4#t=141"></video>
+    <button type="button" class="ev-play" aria-label="Play the carters.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">2:44</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/carters.com.png" alt="" width="20" height="20" loading="lazy"><strong>carters.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Mac hardware, 2 of 2 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/ikea-anchor-default.mp4#t=143"></video>
+    <button type="button" class="ev-play" aria-label="Play the ikea.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">2:46</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/ikea.com.png" alt="" width="20" height="20" loading="lazy"><strong>ikea.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Default session, 2 of 2 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/asos-anchor-default.mp4#t=138"></video>
+    <button type="button" class="ev-play" aria-label="Play the asos.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">2:41</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/asos.com.png" alt="" width="20" height="20" loading="lazy"><strong>asos.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Default session, 2 of 2 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/nike-anchor-mac.mp4#t=166"></video>
+    <button type="button" class="ev-play" aria-label="Play the nike.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">3:13</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/nike.com.png" alt="" width="20" height="20" loading="lazy"><strong>nike.com</strong><span class="chip finished"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.4 5 8.8 9.6 3.4"/></svg>Finished</span></div><small>Mac hardware, 2 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/diy-anchor-default.mp4#t=310"></video>
+    <button type="button" class="ev-play" aria-label="Play the diy.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">6:01</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/diy.com.png" alt="" width="20" height="20" loading="lazy"><strong>diy.com</strong><span class="chip agent"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.2 3v6M7.8 3v6"/></svg>Agent stalled</span></div><small>Default session, 1 of 3 runs passed</small></figcaption>
+</figure>
+<figure class="ev">
+  <div class="ev-media"><video muted playsinline preload="none" data-src="../results/published/recordings/lookfantastic-anchor-default.mp4#t=123"></video>
+    <button type="button" class="ev-play" aria-label="Play the lookfantastic.com recording with controls"><span class="ev-disc"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 3.9v12.2a.8.8 0 0 0 1.2.7l10-6.1a.8.8 0 0 0 0-1.4l-10-6.1A.8.8 0 0 0 6 3.9Z"/></svg></span><span class="ev-time">2:23</span></button><i class="ev-bar" aria-hidden="true"></i></div>
+  <figcaption><div class="ev-site"><img class="logo" src="logos/lookfantastic.com.png" alt="" width="20" height="20" loading="lazy"><strong>lookfantastic.com</strong><span class="chip agent"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.2 3v6M7.8 3v6"/></svg>Agent stalled</span></div><small>Default session, 1 of 3 runs passed</small></figcaption>
+</figure>
+  </div>
+</section>
+
+<section id="method" class="panel method">
+  <div class="panel-head"><h2>How to read this</h2></div>
+  <div class="cols">
+    <div><h3>What ran</h3><p>A small reference agent, a Claude tool-use loop on claude-opus-5-5, with the same grader for every row. The agent is a bundled example, not a tuned shopper.</p></div>
+    <div><h3>What counts</h3><p>The grader reads the browser, not the agent's claim. A run passes when the store accepts the placeholder shipping details. Runs where the browser itself failed are not graded.</p></div>
+    <div><h3>What to hold back</h3><p>Three runs per store per setup is a small sample, and stores change between runs. The best setup is picked after the runs, so it shows what to use, not one configuration tested everywhere.</p></div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="foot-main">
+    <div class="foot-brand"><a class="brand" href="#top">Commerce Bench</a><p>An open harness for testing shopping agents on real stores. Built by <a href="https://anchorbrowser.io/">Anchor Browser</a>, the cloud browser for AI agents.</p></div>
+    <nav class="foot-social" aria-label="Follow Anchor"><span>Follow Anchor</span><a href="https://x.com/AnchorBrowser"><svg width="16" height="16" fill="currentColor" aria-hidden="true" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg>X</a><a href="https://www.linkedin.com/company/anchorbrowser/"><svg width="16" height="16" fill="currentColor" aria-hidden="true" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+LinkedIn</a><a href="https://github.com/anchorbrowser"><svg width="16" height="16" fill="currentColor" aria-hidden="true" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>GitHub</a></nav>
+  </div>
+  <div class="foot-legal"><span>© 2026 <a href="https://anchorbrowser.io/">Anchor Browser</a>. Code under Apache-2.0.</span><a href="https://github.com/anchorbrowser/commerce-bench/tree/v0-harness/results/published">Every run row is in the repository</a></div>
+</footer>
+<div class="tip" role="tooltip" hidden></div>
+<script>const root = document.documentElement;
+document.querySelector('.theme').addEventListener('click', () => {
+  root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('cb-theme', root.dataset.theme);
+});
+
+const rows = [...document.querySelectorAll('#stores tbody tr')];
+const buttons = [...document.querySelectorAll('.filters button')];
+buttons.forEach((button) =>
+  button.addEventListener('click', () => {
+    buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === button)));
+    const tag = button.dataset.tag;
+    rows.forEach((row) => {
+      row.hidden = tag !== 'all' && row.dataset.ending !== tag;
+    });
+  })
+);
+
+const tip = document.querySelector('.tip');
+const show = (target) => {
+  tip.textContent = '';
+  const title = document.createElement('strong');
+  title.textContent = target.dataset.tip;
+  tip.append(title);
+  if (target.dataset.list) {
+    const list = document.createElement('span');
+    list.textContent = target.dataset.list;
+    tip.append(list);
+  }
+  tip.hidden = false;
+  const box = target.getBoundingClientRect();
+  const own = tip.getBoundingClientRect();
+  const left = Math.min(Math.max(8, box.left + box.width / 2 - own.width / 2), innerWidth - own.width - 8);
+  const above = box.top - own.height - 8;
+  tip.style.left = `${left + scrollX}px`;
+  tip.style.top = `${(above < 8 ? box.bottom + 8 : above) + scrollY}px`;
+};
+const hide = () => {
+  tip.hidden = true;
+};
+document.addEventListener('pointerover', (event) => {
+  const target = event.target.closest('[data-tip]');
+  if (target) show(target);
+  else hide();
+});
+document.addEventListener('focusin', (event) => {
+  const target = event.target.closest('[data-tip]');
+  if (target) show(target);
+});
+document.addEventListener('focusout', hide);
+addEventListener('scroll', hide, { passive: true });
+
+const canHover = matchMedia('(hover:hover) and (pointer:fine)').matches;
+const loader = new IntersectionObserver(
+  (entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      entry.target.src = entry.target.dataset.src;
+      entry.target.preload = 'metadata';
+      loader.unobserve(entry.target);
+    }
+  },
+  { rootMargin: '600px 0px' }
+);
+document.querySelectorAll('.ev-media').forEach((media) => {
+  const video = media.querySelector('video');
+  const bar = media.querySelector('.ev-bar');
+  loader.observe(video);
+  const playing = () => media.classList.contains('playing');
+  video.addEventListener('timeupdate', () => {
+    if (video.duration) bar.style.transform = `scaleX(${video.currentTime / video.duration})`;
+  });
+  video.addEventListener('ended', () => {
+    if (!playing()) {
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    }
+  });
+  if (canHover) {
+    media.addEventListener('pointerenter', () => {
+      if (playing()) return;
+      media.classList.add('preview');
+      video.play().catch(() => {});
+    });
+    media.addEventListener('pointerleave', () => {
+      if (playing()) return;
+      media.classList.remove('preview');
+      video.pause();
+    });
+  }
+  media.querySelector('.ev-play').addEventListener('click', () => {
+    media.classList.remove('preview');
+    media.classList.add('playing');
+    video.controls = true;
+    video.muted = false;
+    video.currentTime = 0;
+    video.play().catch(() => {});
+  });
+});
+
+const copy = document.querySelector('.copy');
+const status = document.querySelector('[role=status]');
+let reset;
+copy.addEventListener('click', async () => {
+  const text = document.querySelector('.prompt-src').value;
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.append(area);
+    area.select();
+    document.execCommand('copy');
+    area.remove();
+  }
+  copy.dataset.state = 'done';
+  status.textContent = 'Prompt copied to clipboard';
+  clearTimeout(reset);
+  reset = setTimeout(() => {
+    copy.dataset.state = 'idle';
+    status.textContent = '';
+  }, 2200);
+});
+
+fetch('https://api.github.com/repos/anchorbrowser/commerce-bench')
+  .then((response) => (response.ok ? response.json() : null))
+  .then((data) => {
+    if (!data || !(data.stargazers_count > 0)) return;
+    const count = document.querySelector('.star-n');
+    count.textContent = data.stargazers_count.toLocaleString('en');
+    count.hidden = false;
+  })
+  .catch(() => {});
+</script>
+</body>
+</html>
