@@ -34,14 +34,16 @@ One small reference agent, one task per store: find the named product, put it in
 The same results as a page, with every session recording: [commerce-bench.vercel.app](https://commerce-bench.vercel.app/). It is built from `results/published/` by `npm run site`.
 
 <!-- results:begin -->
-| Browser | Stores finished | Runs passed | Turned away | Store needs an account | Got in, agent did not finish |
-|---|---|---|---|---|---|
-| **Anchor, best setup per store** | **19 of 30** | 55 of 87 | 5 | 2 | 4 |
-| Anchor on Mac hardware | 17 of 30 | 47 of 88 | 5 | 1 | 7 |
-| Anchor, default session | 14 of 30 | 37 of 84 | 13 | 1 | 2 |
-| Chromium on a laptop | 7 of 30 | 20 of 89 | 18 | 1 | 4 |
+**Anchor got the agent past the front door at 25 of 30 stores, twice as many as Chromium on a laptop (12).** Once in, the agent finished checkout at 19. The other 6 stopped on an agent stall (4) or on a store with no guest checkout (2). 5 stores turned the agent away in most runs, even on the best setup.
 
-<sub>30 stores, 3 runs per store on each browser. A store counts as finished when more than half of its graded runs pass. Runs where the harness itself failed (`harness_error`) are not graded. "Turned away" means the agent never reached a product page, or a bot wall or error page ended most runs. Best setup per store takes, for each store, the Anchor setup with the most passing runs. On a tie it takes the setup whose runs got furthest, then the lightest. It is picked after the runs, so read it as a guide to which setup to use for a store, not as one fixed configuration.</sub>
+| Browser | Got in | Finished checkout | Agent stalled (agent's job) | Store needs an account (store policy) | Turned away at the door | Runs passed |
+|---|---|---|---|---|---|---|
+| **Anchor, best setup per store** | **25 of 30** | **19** | 4 | 2 | 5 | 55 of 87 |
+| Anchor on Mac hardware | 25 of 30 | 17 | 7 | 1 | 5 | 47 of 88 |
+| Anchor, default session | 17 of 30 | 14 | 2 | 1 | 13 | 37 of 84 |
+| Chromium on a laptop | 12 of 30 | 7 | 4 | 1 | 18 | 20 of 89 |
+
+<sub>30 stores, 3 runs per store on each browser. A store counts as got in unless it was turned away. A store counts as finished when more than half of its graded runs pass. Runs where the harness itself failed (`harness_error`) are not graded. "Turned away" means the agent never reached a product page, or a bot wall or error page ended most runs. Best setup per store takes, for each store, the Anchor setup with the most passing runs. On a tie it takes the setup whose runs got furthest, then the lightest. It is picked after the runs, so read it as a guide to which setup to use for a store, not as one fixed configuration.</sub>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/results-dark.svg">

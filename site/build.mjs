@@ -36,12 +36,16 @@ const SETUPS = [
 ];
 const SETUP_LABEL = { 'anchor-default': 'Default session', 'anchor-mac': 'Mac hardware', 'anchor-stealth': 'Proxy with extra stealth', 'anchor-residential': 'Residential proxy' };
 const ENDINGS = {
-  finished: { label: 'Finished', long: 'Finished checkout', icon: '<path d="M2.5 6.4 5 8.8 9.6 3.4"/>' },
-  agent: { label: 'Agent stalled', long: 'Got in, agent stalled', icon: '<path d="M4.2 3v6M7.8 3v6"/>' },
-  signin: { label: 'Needs an account', long: 'Store wants an account', icon: '<circle cx="6" cy="4.3" r="1.9"/><path d="M2.6 10c.4-1.9 1.7-2.9 3.4-2.9s3 1 3.4 2.9"/>' },
-  blocked: { label: 'Turned away', long: 'Turned away at the door', icon: '<path d="M3.2 3.2l5.6 5.6M8.8 3.2 3.2 8.8"/>' },
+  finished: { label: 'Finished', long: 'Finished checkout', who: '', icon: '<path d="M2.5 6.4 5 8.8 9.6 3.4"/>' },
+  agent: { label: 'Agent stalled', long: 'Got in, agent stalled', who: 'agent\u2019s job', icon: '<path d="M4.2 3v6M7.8 3v6"/>' },
+  signin: { label: 'Needs an account', long: 'Got in, store wants an account', who: 'store policy', icon: '<circle cx="6" cy="4.3" r="1.9"/><path d="M2.6 10c.4-1.9 1.7-2.9 3.4-2.9s3 1 3.4 2.9"/>' },
+  blocked: { label: 'Turned away', long: 'Turned away at the door', who: '', icon: '<path d="M3.2 3.2l5.6 5.6M8.8 3.2 3.2 8.8"/>' },
 };
 const ORDER = ['finished', 'agent', 'signin', 'blocked'];
+const shortName = (ending) => {
+  const text = ENDINGS[ending].long.replace('Got in, ', '');
+  return text.charAt(0).toUpperCase() + text.slice(1);
+};
 const icon = (ending) => `<svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ENDINGS[ending].icon}</svg>`;
 
 function endingOf(passed, signIn, turnedAway) {
@@ -108,8 +112,13 @@ const stores = Object.keys(sets.best).sort((a, b) => {
 const tally = (id) => Object.fromEntries(ORDER.map((ending) => [ending, Object.keys(sets[id]).filter((site) => sets[id][site].ending === ending).sort()]));
 const best = tally('best');
 const date = new Date(`${index.date}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
-const onDefault = best.finished.filter((site) => sets.default[site]?.ending === 'finished');
-const needMac = best.finished.filter((site) => !onDefault.includes(site));
+const INSIDE = ['finished', 'agent', 'signin'];
+const gotIn = (counts) => INSIDE.flatMap((ending) => counts[ending]);
+const local = tally('local');
+const inBest = gotIn(best);
+const inLocal = gotIn(local);
+const rescued = inBest.filter((site) => local.blocked.includes(site));
+const times = `${Math.floor((inBest.length / inLocal.length) * 10) / 10}x`;
 
 const logo = (site, size = 20) => {
   const file = path.join(here, 'logos', `${site}.png`);
@@ -120,7 +129,8 @@ const logo = (site, size = 20) => {
 const logoRow = (sites) => `<ul class="logos">${sites.map((site) => `<li data-tip="${esc(site)}">${logo(site, 24)}<span class="vh">${esc(site)}</span></li>`).join('')}</ul>`;
 
 function receipt() {
-  const lines = ORDER.map((ending) => `<div class="r-line"><span><i class="sw ${ending}"></i>${ENDINGS[ending].long}</span><b>${best[ending].length}</b></div>`).join('');
+  const line = (ending, sub) => `<div class="r-line${sub ? ' r-sub' : ''}"><span><i class="sw ${ending}"></i>${shortName(ending)}</span><b>${best[ending].length}</b></div>`;
+  const lines = `<div class="r-line r-strong"><span>Got past the front door</span><b>${inBest.length}</b></div>${INSIDE.map((ending) => line(ending, true)).join('')}${line('blocked', false)}`;
   let seed = 7;
   const bars = Array.from({ length: 46 }, () => {
     seed = (seed * 73 + 19) % 101;
@@ -138,7 +148,7 @@ function receipt() {
   <div class="r-line"><span>Cards entered</span><b>0</b></div>
   <div class="r-line"><span>Orders placed</span><b>${index.all_runs.guard_breaches}</b></div>
   <div class="r-rule"></div>
-  <div class="r-total"><span>Finished</span><b>${best.finished.length} of ${stores.length}</b></div>
+  <div class="r-total"><span>Got in</span><b>${inBest.length} of ${stores.length}</b></div>
   <div class="r-bars" aria-hidden="true">${bars}</div>
   <p class="r-foot">Nothing was bought. Every run stops before payment.</p>
 </aside>`;
@@ -148,14 +158,19 @@ function setupBars() {
   const rows = ['best', 'mac', 'default', 'local'].map((id) => {
     const setup = SETUPS.find((entry) => entry.id === id);
     const counts = tally(id);
-    const segs = ORDER.filter((ending) => counts[ending].length).map((ending) => {
+    const inside = gotIn(counts).length;
+    const seg = (ending) => {
       const sites = counts[ending];
-      return `<span class="seg ${ending}" style="flex:${sites.length}" tabindex="0" data-tip="${esc(`${ENDINGS[ending].long}: ${sites.length}`)}" data-list="${esc(sites.join(', '))}"><b>${sites.length}</b></span>`;
-    }).join('');
-    return `<div class="bar-row${id === 'best' ? ' lead' : ''}"><div class="bar-name">${esc(setup.name)}</div><div class="bar" role="img" aria-label="${esc(ORDER.map((ending) => `${ENDINGS[ending].long} ${counts[ending].length}`).join(', '))}">${segs}</div></div>`;
+      if (!sites.length) return '';
+      const who = ENDINGS[ending].who ? ` (${ENDINGS[ending].who})` : '';
+      return `<span class="seg ${ending}" style="flex:${sites.length}" tabindex="0" data-tip="${esc(`${ENDINGS[ending].long}${who}: ${sites.length}`)}" data-list="${esc(sites.join(', '))}"><b>${sites.length}</b></span>`;
+    };
+    const label = `Got in ${inside} of ${stores.length}. ${ORDER.map((ending) => `${ENDINGS[ending].long} ${counts[ending].length}`).join(', ')}`;
+    const callout = id === 'best' ? `<span class="callout">${inside}/${stores.length} in, ${times} Chromium</span>` : '';
+    return `<div class="bar-row${id === 'best' ? ' lead' : ''}"><div class="bar-name">${esc(setup.name)}${callout}</div><div class="bar-in"><b>${inside}</b><span>of ${stores.length} got in</span></div><div class="bar" role="img" aria-label="${esc(label)}">${inside ? `<span class="in" style="flex:${inside}"><i class="in-rail"></i><span class="in-segs">${INSIDE.map(seg).join('')}</span></span>` : ''}${seg('blocked')}</div></div>`;
   }).join('');
-  const legend = ORDER.map((ending) => `<li><i class="sw ${ending}"></i>${ENDINGS[ending].long}</li>`).join('');
-  return `<ul class="legend">${legend}</ul><div class="bars">${rows}</div>`;
+  const legend = ORDER.map((ending) => `<li><i class="sw ${ending}"></i>${shortName(ending)}${ENDINGS[ending].who ? `<em>${ENDINGS[ending].who}</em>` : ''}</li>`).join('');
+  return `<ul class="legend"><li><i class="sw rail"></i>Got in</li>${legend}</ul><div class="bars">${rows}</div>`;
 }
 
 function stepState(cell, i) {
@@ -276,7 +291,6 @@ function actions() {
 }
 const css = fs.readFileSync(path.join(here, 'site.css'), 'utf8');
 const js = fs.readFileSync(path.join(here, 'site.js'), 'utf8');
-const local = tally('local');
 const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -284,21 +298,22 @@ const html = `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Commerce Bench: which stores let a shopping agent check out</title>
 <script>document.documentElement.dataset.theme=new URLSearchParams(location.search).get('theme')||localStorage.getItem('cb-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')</script>
+<link rel="icon" type="image/png" href="anchor-mark.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400..700&family=Instrument+Serif&display=swap" rel="stylesheet">
 <style>${css}</style>
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="#top">Commerce Bench</a>
+  <a class="brand" href="#top"><img src="anchor-mark.png" alt="" width="24" height="24">Commerce Bench</a>
   <nav aria-label="Sections"><a href="#setups">Setups</a><a href="#stores">Stores</a><a href="#stopped">Why runs stopped</a><a href="#recordings">Recordings</a><a href="#method">Method</a></nav>
-  <div class="top-end"><button type="button" class="theme" aria-label="Switch between light and dark">Theme</button><a class="gh" href="https://github.com/anchorbrowser/commerce-bench">Open source on GitHub</a></div>
+  <div class="top-end"><button type="button" class="theme" aria-label="Switch between light and dark" data-tip="Switch theme"><svg class="sun" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="3.4"/><path d="M10 2.2v2M10 15.8v2M2.2 10h2M15.8 10h2M4.5 4.5l1.4 1.4M14.1 14.1l1.4 1.4M4.5 15.5l1.4-1.4M14.1 5.9l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.6 11.9A7 7 0 0 1 8.1 3.4a7 7 0 1 0 8.5 8.5Z"/></svg></button><a class="gh" href="https://github.com/anchorbrowser/commerce-bench">${agentIcon('github')}<span>GitHub</span></a></div>
 </header>
 <main id="top">
 <section class="hero">
   <div class="hero-text">
     <h1>Which stores let a shopping agent check out?</h1>
-    <p class="lede">One agent, ${stores.length} real stores, one task: find the product, add it to the cart, check out as a guest, stop before payment. Only the browser changed. With the right Anchor setup the agent finished ${best.finished.length} stores. On a laptop browser it finished ${local.finished.length}.</p>
+    <p class="lede">One agent, ${stores.length} real stores, one task: find the product, add it to the cart, check out as a guest, stop before payment. Only the browser changed. Anchor got the agent past the front door at ${inBest.length} stores, Chromium on a laptop at ${inLocal.length}. Once in, the agent finished checkout at ${best.finished.length}. The other ${inBest.length - best.finished.length} stopped on an agent stall or on a store with no guest checkout.</p>
     ${actions()}
     <dl class="meta"><div><dt>Updated</dt><dd>${date}</dd></div><div><dt>Runs</dt><dd>${index.all_runs.rows}</dd></div><div><dt>Stores</dt><dd>${stores.length}</dd></div><div><dt>Runs per store</dt><dd>3</dd></div></dl>
   </div>
@@ -306,13 +321,13 @@ const html = `<!doctype html>
 </section>
 
 <section class="picks" aria-label="Three findings">
-  <article><h2>${onDefault.length} stores finish on a default session</h2><p>No proxy, no stealth settings, nothing tuned for the store.</p>${logoRow(onDefault)}</article>
-  <article><h2>${needMac.length} more need Mac hardware</h2><p>These stores turned a default session away. A real Mac got through.</p>${logoRow(needMac)}</article>
+  <article><h2>Anchor got in at ${inBest.length} of ${stores.length} stores</h2><p>Chromium on a laptop got in at ${inLocal.length}. ${rescued.length} stores that turned the laptop away let Anchor in.</p>${logoRow(rescued)}</article>
+  <article><h2>${best.finished.length} of those ${inBest.length} finished checkout</h2><p>${best.agent.length} more stopped on an agent stall and ${best.signin.length} on a store with no guest checkout. Neither is a browser block.</p>${logoRow(best.finished)}</article>
   <article><h2>${best.blocked.length} stayed shut on every setup</h2><p>A bot wall or an error page ended most runs, whichever browser was used.</p>${logoRow(best.blocked)}</article>
 </section>
 
 <section id="setups" class="panel">
-  <div class="panel-head"><h2>Same agent, four browsers</h2><p>Each bar is ${stores.length} stores. A store counts as finished when more than half of its graded runs pass.</p></div>
+  <div class="panel-head"><h2>Same agent, four browsers: who gets past the front door?</h2><p>Getting in is the browser\u2019s job. Finishing checkout after that depends on the agent, which is what Commerce Bench helps you tune. Each bar is ${stores.length} stores. A store counts as got in unless a bot wall or an error page ended most of its runs.</p></div>
   ${setupBars()}
 </section>
 
@@ -364,7 +379,8 @@ ${recordings(clips)}
 if (dist) {
   fs.mkdirSync(path.join(dist, 'recordings'), { recursive: true });
   fs.cpSync(path.join(here, 'logos'), path.join(dist, 'logos'), { recursive: true });
+  for (const file of ['anchor-mark.png', 'apple-touch-icon.png']) fs.copyFileSync(path.join(here, file), path.join(dist, file));
   for (const clip of clips) fs.copyFileSync(path.join(published, 'recordings', clip.file), path.join(dist, 'recordings', clip.file));
 }
 fs.writeFileSync(path.join(out, 'index.html'), html);
-console.log(JSON.stringify({ stores: stores.length, best: Object.fromEntries(ORDER.map((e) => [e, best[e].length])), local: Object.fromEntries(ORDER.map((e) => [e, local[e].length])), default: onDefault.length, mac: needMac.length }));
+console.log(JSON.stringify({ stores: stores.length, best: Object.fromEntries(ORDER.map((e) => [e, best[e].length])), local: Object.fromEntries(ORDER.map((e) => [e, local[e].length])), gotIn: { best: inBest.length, mac: gotIn(tally('mac')).length, default: gotIn(tally('default')).length, local: inLocal.length }, rescued: rescued.length, times }));
