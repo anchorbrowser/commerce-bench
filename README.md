@@ -437,6 +437,10 @@ test/        unit tests for the grader and the stage rules
 
 Low volume, guest checkout, no purchases. Read [TERMS.md](TERMS.md) before pointing this at real sites.
 
+## Contributing
+
+Bug reports with a run attached, store fixes and new stores are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## License
 
 [Apache-2.0](LICENSE)
