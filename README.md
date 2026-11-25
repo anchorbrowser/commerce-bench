@@ -31,7 +31,7 @@ Three things it does that a self-reported score does not:
 
 One small reference agent, one task per store: find the named product, put it in the cart, check out as a guest and get the shipping details accepted. Same agent, same stores, same grader. Only the browser changed. Getting in is the browser's job. Finishing after that is the agent's.
 
-The same results as a page, with every session recording: [commerce-bench.vercel.app](https://commerce-bench.vercel.app/). It is built from `results/published/` by `npm run site`.
+The same results as a page, with every session recording: [commerce.assistantanalysis.com](https://commerce.assistantanalysis.com/). It is built from `results/published/` by `npm run site`.
 
 <!-- results:begin -->
 **Anchor got the agent past the front door at 25 of 30 stores, twice as many as Chromium on a laptop (12).** Once in, the agent finished checkout at 19. The other 6 stopped on an agent stall (4) or on a store with no guest checkout (2). 5 stores turned the agent away in most runs, even on the best setup.
