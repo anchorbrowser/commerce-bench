@@ -36,12 +36,12 @@ The same results as a page, with every session recording: [commerce-bench.vercel
 <!-- results:begin -->
 **Anchor got the agent past the front door at 25 of 30 stores, twice as many as Chromium on a laptop (12).** Once in, the agent finished checkout at 19. The other 6 stopped on an agent stall (4) or on a store with no guest checkout (2). 5 stores turned the agent away in most runs, even on the best setup.
 
-| Browser | Got in | Finished checkout | Agent stalled (agent's job) | Store needs an account (store policy) | Turned away at the door | Runs passed |
-|---|---|---|---|---|---|---|
-| **Anchor, best setup per store** | **25 of 30** | **19** | 4 | 2 | 5 | 55 of 87 |
-| Anchor on Mac hardware | 25 of 30 | 17 | 7 | 1 | 5 | 47 of 88 |
-| Anchor, default session | 17 of 30 | 14 | 2 | 1 | 13 | 37 of 84 |
-| Chromium on a laptop | 12 of 30 | 7 | 4 | 1 | 18 | 20 of 89 |
+| Browser | Got&nbsp;in | Finished | Agent stalled<br><sub>agent's job</sub> | Needs account<br><sub>store policy</sub> | Turned away | Runs passed |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Anchor, best setup per store** | **25&nbsp;of&nbsp;30** | **19** | 4 | 2 | 5 | 55&nbsp;of&nbsp;87 |
+| Anchor on Mac hardware | 25&nbsp;of&nbsp;30 | 17 | 7 | 1 | 5 | 47&nbsp;of&nbsp;88 |
+| Anchor, default session | 17&nbsp;of&nbsp;30 | 14 | 2 | 1 | 13 | 37&nbsp;of&nbsp;84 |
+| Chromium on a laptop | 12&nbsp;of&nbsp;30 | 7 | 4 | 1 | 18 | 20&nbsp;of&nbsp;89 |
 
 <sub>30 stores, 3 runs per store on each browser. A store counts as got in unless it was turned away. A store counts as finished when more than half of its graded runs pass. Runs where the harness itself failed (`harness_error`) are not graded. "Turned away" means the agent never reached a product page, or a bot wall or error page ended most runs. Best setup per store takes, for each store, the Anchor setup with the most passing runs. On a tie it takes the setup whose runs got furthest, then the lightest. It is picked after the runs, so read it as a guide to which setup to use for a store, not as one fixed configuration.</sub>
 

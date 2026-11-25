@@ -162,10 +162,10 @@ if (best && local && fs.existsSync(readme)) {
   const perStore = counts.sort((a, b) => counts.filter((n) => n === b).length - counts.filter((n) => n === a).length)[0];
   const uneven = rows.some((row) => Object.values(row.cells).some((cell) => cell.runs !== perStore));
   const table = [
-    '| Browser | Got in | Finished checkout | Agent stalled (agent\'s job) | Store needs an account (store policy) | Turned away at the door | Runs passed |',
-    '|---|---|---|---|---|---|---|',
+    '| Browser | Got&nbsp;in | Finished | Agent stalled<br><sub>agent\'s job</sub> | Needs account<br><sub>store policy</sub> | Turned away | Runs passed |',
+    '|:---|:---:|:---:|:---:|:---:|:---:|:---:|',
     ...rows.map((row) => {
-      const cells = [row.name, `${gotInOf(row)} of ${Object.keys(row.cells).length}`, finishedOf(row), sitesWith(row, 'agent').length, sitesWith(row, 'signin').length, sitesWith(row, 'blocked').length, `${passedRuns(row)} of ${graded(row)}`];
+      const cells = [row.name, `${gotInOf(row)}&nbsp;of&nbsp;${Object.keys(row.cells).length}`, finishedOf(row), sitesWith(row, 'agent').length, sitesWith(row, 'signin').length, sitesWith(row, 'blocked').length, `${passedRuns(row)}&nbsp;of&nbsp;${graded(row)}`];
       return `| ${row === best ? cells.map((cell, i) => (i < 3 ? `**${cell}**` : cell)).join(' | ') : cells.join(' | ')} |`;
     }),
   ].join('\n');
