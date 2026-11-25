@@ -289,6 +289,24 @@ function actions() {
     <textarea class="prompt-src" hidden readonly>${esc(agentPrompt)}</textarea>
     <span class="vh" role="status" aria-live="polite"></span>`;
 }
+const SITE_URL = 'https://commerce.assistantanalysis.com';
+const pageTitle = 'Commerce Bench: which stores let a shopping agent check out';
+const pageBlurb = `One shopping agent, ${stores.length} real stores, four browsers. Anchor got the agent past the front door at ${inBest.length} stores, Chromium on a laptop at ${inLocal.length}. Every run recorded, nothing bought.`;
+function ogCard() {
+  const row = (name, counts) => `<div class="row"><span>${name}</span><b>${gotIn(counts).length}<small>of ${stores.length} got in</small></b><div class="bar">${ORDER.filter((ending) => counts[ending].length).map((ending) => `<i class="${ending}" style="flex:${counts[ending].length}">${counts[ending].length}</i>`).join('')}</div></div>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Commerce Bench social card</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Instrument+Sans:wght@400..700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>*{box-sizing:border-box;margin:0}body{width:1200px;height:630px;background:#eef0ec;color:#15171a;font:400 24px "Instrument Sans",sans-serif;padding:56px 64px;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:14px;font:400 32px "Instrument Serif",serif}.brand img{border-radius:8px}.brand em{margin-left:auto;font:500 20px "IBM Plex Mono",monospace;font-style:normal;color:#474c54}
+h1{font:400 84px/1 "Instrument Serif",serif;letter-spacing:-.015em;margin-top:40px;max-width:21ch;text-wrap:balance}
+.rows{margin-top:auto;display:flex;flex-direction:column;gap:16px}.row{display:grid;grid-template-columns:270px 190px 1fr;align-items:center;gap:18px}
+.row span{font-weight:600}.row b{font:600 40px "IBM Plex Mono",monospace;color:#006c10;display:flex;align-items:baseline;gap:10px}.row small{font:400 17px "Instrument Sans",sans-serif;color:#6d737c}
+.bar{display:flex;gap:3px;height:44px}.bar i{display:flex;align-items:center;padding-left:12px;font:600 19px "IBM Plex Mono",monospace;font-style:normal;color:#fff}.bar i:first-child{border-radius:7px 0 0 7px}.bar i:last-child{border-radius:0 7px 7px 0}
+.finished{background:#0a7d1f}.agent{background:#8b9099}.signin{background:#c2c6cb;color:#15171a!important}.blocked{background:#dc3c3d}</style></head>
+<body><div class="brand"><img src="anchor-mark.png" width="44" height="44" alt="">Commerce Bench<em>${SITE_URL.replace('https://', '')}</em></div>
+<h1>Which stores let a shopping agent check out?</h1>
+<div class="rows">${row('Anchor, best setup', best)}${row('Chromium on a laptop', local)}</div></body></html>`;
+}
 const css = fs.readFileSync(path.join(here, 'site.css'), 'utf8');
 const js = fs.readFileSync(path.join(here, 'site.js'), 'utf8');
 const html = `<!doctype html>
@@ -296,7 +314,13 @@ const html = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Commerce Bench: which stores let a shopping agent check out</title>
+<title>${pageTitle}</title>
+<meta name="description" content="${esc(pageBlurb)}">
+<link rel="canonical" href="${SITE_URL}/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Commerce Bench"><meta property="og:url" content="${SITE_URL}/">
+<meta property="og:title" content="${esc(pageTitle)}"><meta property="og:description" content="${esc(pageBlurb)}">
+<meta property="og:image" content="${SITE_URL}/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Two bars: Anchor got in at ${inBest.length} of ${stores.length} stores, Chromium on a laptop at ${inLocal.length}.">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@AnchorBrowser"><meta name="twitter:title" content="${esc(pageTitle)}"><meta name="twitter:description" content="${esc(pageBlurb)}"><meta name="twitter:image" content="${SITE_URL}/og.png">
 <script>document.documentElement.dataset.theme=new URLSearchParams(location.search).get('theme')||localStorage.getItem('cb-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')</script>
 <link rel="icon" type="image/png" href="anchor-mark.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -379,8 +403,9 @@ ${recordings(clips)}
 if (dist) {
   fs.mkdirSync(path.join(dist, 'recordings'), { recursive: true });
   fs.cpSync(path.join(here, 'logos'), path.join(dist, 'logos'), { recursive: true });
-  for (const file of ['anchor-mark.png', 'apple-touch-icon.png']) fs.copyFileSync(path.join(here, file), path.join(dist, file));
+  for (const file of ['anchor-mark.png', 'apple-touch-icon.png', 'og.png']) fs.copyFileSync(path.join(here, file), path.join(dist, file));
   for (const clip of clips) fs.copyFileSync(path.join(published, 'recordings', clip.file), path.join(dist, 'recordings', clip.file));
 }
 fs.writeFileSync(path.join(out, 'index.html'), html);
+if (!dist) fs.writeFileSync(path.join(here, 'og.html'), ogCard());
 console.log(JSON.stringify({ stores: stores.length, best: Object.fromEntries(ORDER.map((e) => [e, best[e].length])), local: Object.fromEntries(ORDER.map((e) => [e, local[e].length])), gotIn: { best: inBest.length, mac: gotIn(tally('mac')).length, default: gotIn(tally('default')).length, local: inLocal.length }, rescued: rescued.length, times }));
