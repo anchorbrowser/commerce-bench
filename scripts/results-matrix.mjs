@@ -156,16 +156,17 @@ if (best && local && fs.existsSync(readme)) {
   const picks = JSON.parse(fs.readFileSync(path.join(published, 'best-setup.json'), 'utf8')).stores;
   const index = JSON.parse(fs.readFileSync(path.join(published, 'index.json'), 'utf8'));
   const finishedOf = (row) => sitesWith(row, 'finished').length;
+  const gotInOf = (row) => Object.keys(row.cells).length - sitesWith(row, 'blocked').length;
   const singles = rows.filter((row) => row !== best && row !== local).sort((a, b) => finishedOf(b) - finishedOf(a));
   const counts = Object.values(best.cells).map((cell) => cell.runs);
   const perStore = counts.sort((a, b) => counts.filter((n) => n === b).length - counts.filter((n) => n === a).length)[0];
   const uneven = rows.some((row) => Object.values(row.cells).some((cell) => cell.runs !== perStore));
   const table = [
-    '| Browser | Stores finished | Runs passed | Turned away | Store needs an account | Got in, agent did not finish |',
-    '|---|---|---|---|---|---|',
+    '| Browser | Got in | Finished checkout | Agent stalled (agent\'s job) | Store needs an account (store policy) | Turned away at the door | Runs passed |',
+    '|---|---|---|---|---|---|---|',
     ...rows.map((row) => {
-      const cells = [row.name, `${finishedOf(row)} of ${Object.keys(row.cells).length}`, `${passedRuns(row)} of ${graded(row)}`, sitesWith(row, 'blocked').length, sitesWith(row, 'signin').length, sitesWith(row, 'agent').length];
-      return `| ${row === best ? cells.map((cell, i) => (i < 2 ? `**${cell}**` : cell)).join(' | ') : cells.join(' | ')} |`;
+      const cells = [row.name, `${gotInOf(row)} of ${Object.keys(row.cells).length}`, finishedOf(row), sitesWith(row, 'agent').length, sitesWith(row, 'signin').length, sitesWith(row, 'blocked').length, `${passedRuns(row)} of ${graded(row)}`];
+      return `| ${row === best ? cells.map((cell, i) => (i < 3 ? `**${cell}**` : cell)).join(' | ') : cells.join(' | ')} |`;
     }),
   ].join('\n');
 
@@ -182,6 +183,8 @@ if (best && local && fs.existsSync(readme)) {
   const others = [...singles.slice(1), local];
   const capital = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
+  const times = Math.floor((gotInOf(best) / gotInOf(local)) * 10) / 10;
+  const lead = `**Anchor got the agent past the front door at ${gotInOf(best)} of ${stores.length} stores, ${times === 2 ? 'twice' : `${times} times`} as many as Chromium on a laptop (${gotInOf(local)}).** Once in, the agent finished checkout at ${finishedOf(best)}. The other ${gotInOf(best) - finishedOf(best)} stopped on an agent stall (${sitesWith(best, 'agent').length}) or on a store with no guest checkout (${sitesWith(best, 'signin').length}). ${sitesWith(best, 'blocked').length} stores turned the agent away in most runs, even on the best setup.`;
   const bullets = [
     `- **The right Anchor setup per store finishes the most.** With the best setup for each store, the reference agent finished ${finishedOf(best)} of ${stores.length} stores.${strongest ? ` The strongest single setup, ${strongest.short}, finished ${finishedOf(strongest)}.` : ''} ${others.map((row, i) => (i === 0 ? `${capital(row.short)} finished ${finishedOf(row)}` : `${row.short} ${finishedOf(row)}`)).join(others.length > 2 ? ', ' : ' and ')}.`,
     `- **The browser decides whether the agent gets a chance.** The agent never changed. A laptop browser was turned away at ${sitesWith(local, 'blocked').length} stores, the best Anchor setup at ${open.length}.${rescued.length ? ` ${rescued.length} stores that turned the laptop browser away were finished on Anchor: ${list(rescued)}.` : ''}`,
@@ -213,9 +216,11 @@ if (best && local && fs.existsSync(readme)) {
   const example = [...groups.entries()].find(([config]) => config.endsWith('mac.json')) ?? [...groups.entries()][0];
 
   const block = `<!-- results:begin -->
+${lead}
+
 ${table}
 
-<sub>${stores.length} stores, ${perStore} runs per store on each browser${uneven ? ', a few stores fewer' : ''}. A store counts as finished when more than half of its graded runs pass. Runs where the harness itself failed (\`harness_error\`) are not graded. "Turned away" means the agent never reached a product page, or a bot wall or error page ended most runs. Best setup per store takes, for each store, the Anchor setup with the most passing runs. On a tie it takes the setup whose runs got furthest, then the lightest. It is picked after the runs, so read it as a guide to which setup to use for a store, not as one fixed configuration.</sub>
+<sub>${stores.length} stores, ${perStore} runs per store on each browser${uneven ? ', a few stores fewer' : ''}. A store counts as got in unless it was turned away. A store counts as finished when more than half of its graded runs pass. Runs where the harness itself failed (\`harness_error\`) are not graded. "Turned away" means the agent never reached a product page, or a bot wall or error page ended most runs. Best setup per store takes, for each store, the Anchor setup with the most passing runs. On a tie it takes the setup whose runs got furthest, then the lightest. It is picked after the runs, so read it as a guide to which setup to use for a store, not as one fixed configuration.</sub>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/results-dark.svg">
