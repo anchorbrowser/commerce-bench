@@ -298,15 +298,16 @@ const html = `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Commerce Bench: which stores let a shopping agent check out</title>
 <script>document.documentElement.dataset.theme=new URLSearchParams(location.search).get('theme')||localStorage.getItem('cb-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')</script>
+<link rel="icon" type="image/png" href="favicon.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400..700&family=Instrument+Serif&display=swap" rel="stylesheet">
 <style>${css}</style>
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="#top">Commerce Bench</a>
+  <a class="brand" href="#top"><img src="favicon.png" alt="" width="24" height="24">Commerce Bench</a>
   <nav aria-label="Sections"><a href="#setups">Setups</a><a href="#stores">Stores</a><a href="#stopped">Why runs stopped</a><a href="#recordings">Recordings</a><a href="#method">Method</a></nav>
-  <div class="top-end"><button type="button" class="theme" aria-label="Switch between light and dark">Theme</button><a class="gh" href="https://github.com/anchorbrowser/commerce-bench">Open source on GitHub</a></div>
+  <div class="top-end"><button type="button" class="theme" aria-label="Switch between light and dark" data-tip="Switch theme"><svg class="sun" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="3.4"/><path d="M10 2.2v2M10 15.8v2M2.2 10h2M15.8 10h2M4.5 4.5l1.4 1.4M14.1 14.1l1.4 1.4M4.5 15.5l1.4-1.4M14.1 5.9l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.6 11.9A7 7 0 0 1 8.1 3.4a7 7 0 1 0 8.5 8.5Z"/></svg></button><a class="gh" href="https://github.com/anchorbrowser/commerce-bench">${agentIcon('github')}<span>GitHub</span></a></div>
 </header>
 <main id="top">
 <section class="hero">
@@ -378,6 +379,7 @@ ${recordings(clips)}
 if (dist) {
   fs.mkdirSync(path.join(dist, 'recordings'), { recursive: true });
   fs.cpSync(path.join(here, 'logos'), path.join(dist, 'logos'), { recursive: true });
+  for (const file of ['favicon.png', 'apple-touch-icon.png']) fs.copyFileSync(path.join(here, file), path.join(dist, file));
   for (const clip of clips) fs.copyFileSync(path.join(published, 'recordings', clip.file), path.join(dist, 'recordings', clip.file));
 }
 fs.writeFileSync(path.join(out, 'index.html'), html);
